@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 from distutils.core import setup
-# TODO(glasser): Make sure that test stuff is included/documented.
+
 setup(name='mox',
       version='1.0.0',
       py_modules=['mox', 'stubout'],
