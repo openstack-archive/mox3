@@ -2,7 +2,7 @@
 from distutils.core import setup
 
 setup(name='mox',
-      version='1.0.0',
+      version='0.5.0',
       py_modules=['mox', 'stubout'],
       url='http://code.google.com/p/pymox/',
       maintainer='pymox maintainers',
