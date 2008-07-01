@@ -1395,4 +1395,5 @@ class MoxTestBase(unittest.TestCase):
   __metaclass__ = MoxMetaTestBase
 
   def setUp(self):
+    super(MoxTestBase, self).setUp()
     self.mox = Mox()

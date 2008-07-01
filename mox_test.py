@@ -1250,6 +1250,26 @@ class ResetTest(unittest.TestCase):
     self.assertEquals(0, len(mock_obj._expected_calls_queue))
 
 
+class MyTestCase(unittest.TestCase):
+  """Simulate the use of a fake wrapper around Python's unittest library."""
+
+  def setUp(self):
+    super(MyTestCase, self).setUp()
+    self.critical_variable = 42
+
+
+class MoxTestBaseMultipleInheritanceTest(mox.MoxTestBase, MyTestCase):
+  """Test that multiple inheritance can be used with MoxTestBase."""
+
+  def setUp(self):
+    super(MoxTestBaseMultipleInheritanceTest, self).setUp()
+
+  def testMultipleInheritance(self):
+    """Should be able to access members created by all parent setUp()."""
+    self.assert_(isinstance(self.mox, mox.Mox))
+    self.assertEquals(42, self.critical_variable)
+
+
 class TestClass:
   """This class is used only for testing the mock framework"""
 
