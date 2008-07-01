@@ -965,6 +965,40 @@ class In(Comparator):
     return '<sequence or map containing \'%s\'>' % self._key
 
 
+class Not(Comparator):
+  """Checks whether a predicates is False.
+
+  Example:
+    mock_dao.UpdateUsers(Not(ContainsKeyValue('stevepm', stevepm_user_info)))
+  """
+
+  def __init__(self, predicate):
+    """Initialize.
+
+    Args:
+      # predicate: a Comparator instance.
+    """
+
+    assert isinstance(predicate, Comparator), ("predicate %r must be a"
+                                               " Comparator." % predicate)
+    self._predicate = predicate
+
+  def equals(self, rhs):
+    """Check to see whether the predicate is False.
+
+    Args:
+      rhs: A value that will be given in argument of the predicate.
+
+    Returns:
+      bool
+    """
+
+    return not self._predicate.equals(rhs)
+
+  def __repr__(self):
+    return '<not \'%s\'>' % self._predicate
+
+
 class ContainsKeyValue(Comparator):
   """Checks whether a key/value pair is in a dict parameter.
 

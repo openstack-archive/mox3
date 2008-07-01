@@ -159,6 +159,38 @@ class InTest(unittest.TestCase):
     self.assert_(mox.In("test") == {"test" : "module"})
 
 
+class NotTest(unittest.TestCase):
+  """Test Not correctly identifies False predicates."""
+
+  def testItemInList(self):
+    """Should return True if the item is NOT in the list."""
+    self.assert_(mox.Not(mox.In(42)) == [1, 2, 3])
+
+  def testKeyInDict(self):
+    """Should return True if the item is NOT a key in a dict."""
+    self.assert_(mox.Not(mox.In("foo")) == {"key" : 42})
+
+  def testInvalidKeyWithNot(self):
+    """Should return False if they key is NOT in the dict."""
+    self.assert_(mox.Not(mox.ContainsKeyValue("qux", 1)) == {"key": 2})
+
+
+class NotTest(unittest.TestCase):
+  """Test Not correctly identifies False predicates."""
+
+  def testItemInList(self):
+    """Should return True if the item is NOT in the list."""
+    self.assert_(mox.Not(mox.In(42)) == [1, 2, 3])
+
+  def testKeyInDict(self):
+    """Should return True if the item is NOT a key in a dict."""
+    self.assert_(mox.Not(mox.In("foo")) == {"key" : 42})
+
+  def testInvalidKeyWithNot(self):
+    """Should return False if they key is NOT in the dict."""
+    self.assert_(mox.Not(mox.ContainsKeyValue("qux", 1)) == {"key": 2})
+
+
 class StrContainsTest(unittest.TestCase):
   """Test StrContains correctly checks for substring occurrence of a parameter.
   """
