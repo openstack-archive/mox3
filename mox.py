@@ -484,6 +484,33 @@ class MockObject(MockAnything, object):
     # Otherwise, create a mock method __getitem__.
     return self._CreateMockMethod('__getitem__')(key)
 
+  def __contains__(self, key):
+    """Provide custom logic for mocking classes that contain items.
+
+    Args:
+      key: Key to look in container for.
+
+    Returns:
+      Expected return value in replay mode.  A MockMethod object for the
+      __contains__ method that has already been called if not in replay mode.
+
+    Raises:
+      TypeError if the underlying class does not implement __contains__
+      UnexpectedMethodCaller if the object does not expect the call to
+      __contains__.
+
+    """
+    contains = self._class_to_mock.__dict__.get('__contains__', None)
+
+    if contains is None:
+      raise TypeError('unsubscriptable object')
+
+    if self._replay_mode:
+      return MockMethod('__contains__', self._expected_calls_queue,
+                        self._replay_mode)(key)
+
+    return self._CreateMockMethod('__contains__')(key)
+
   def __call__(self, *params, **named_params):
     """Provide custom logic for mocking classes that are callable."""
 

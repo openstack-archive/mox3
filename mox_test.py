@@ -748,6 +748,46 @@ class MockObjectTest(unittest.TestCase):
 
     dummy._Verify()
 
+  def testMockContains_ExpectedContains_Success(self):
+    """Test that __contains__ gets mocked in Dummy.
+
+    In this test, _Verify() succeeds.
+    """
+    dummy = mox.MockObject(TestClass)
+    dummy.__contains__('X').AndReturn(True)
+
+    dummy._Replay()
+
+    self.failUnless('X' in dummy)
+
+    dummy._Verify()
+
+  def testMockContains_ExpectedContains_NoSuccess(self):
+    """Test that __contains__() gets mocked in Dummy.
+
+    In this test, _Verify() fails.
+    """
+    dummy = mox.MockObject(TestClass)
+    dummy.__contains__('X').AndReturn('True')
+
+    dummy._Replay()
+
+    # NOT doing 'X' in dummy
+
+    self.assertRaises(mox.ExpectedMethodCallsError, dummy._Verify)
+
+  def testMockContains_ExpectedContains_NonmatchingParameter(self):
+    """Test that __contains__ fails if other parameters are expected."""
+    dummy = mox.MockObject(TestClass)
+    dummy.__contains__('X').AndReturn(True)
+
+    dummy._Replay()
+
+    def call(): return 'Y' in dummy
+
+    self.assertRaises(mox.UnexpectedMethodCallError, call)
+
+    dummy._Verify()
 
 class MoxTest(unittest.TestCase):
   """Verify Mox works correctly."""
@@ -1337,6 +1377,10 @@ class TestClass:
   def __setitem__(self, key, value):
     """Set the value for key to value."""
     self.d[key] = value
+
+  def __contains__(self, key):
+     """Returns True if d contains the key."""
+     return key in self.d
 
 
 class ChildClass(TestClass):
