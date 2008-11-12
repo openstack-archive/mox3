@@ -534,6 +534,144 @@ class MockAnythingTest(unittest.TestCase):
     self.mock_object._Verify()
 
 
+class MethodCheckerTest(unittest.TestCase):
+  """Tests MockMethod's use of MethodChecker method."""
+
+  def testNoParameters(self):
+    method = mox.MockMethod('NoParameters', [], False,
+                            CheckCallTestClass.NoParameters)
+    method()
+    self.assertRaises(AttributeError, method, 1)
+    self.assertRaises(AttributeError, method, 1, 2)
+    self.assertRaises(AttributeError, method, a=1)
+    self.assertRaises(AttributeError, method, 1, b=2)
+
+  def testOneParameter(self):
+    method = mox.MockMethod('OneParameter', [], False,
+                            CheckCallTestClass.OneParameter)
+    self.assertRaises(AttributeError, method)
+    method(1)
+    method(a=1)
+    self.assertRaises(AttributeError, method, b=1)
+    self.assertRaises(AttributeError, method, 1, 2)
+    self.assertRaises(AttributeError, method, 1, a=2)
+    self.assertRaises(AttributeError, method, 1, b=2)
+
+  def testTwoParameters(self):
+    method = mox.MockMethod('TwoParameters', [], False,
+                            CheckCallTestClass.TwoParameters)
+    self.assertRaises(AttributeError, method)
+    self.assertRaises(AttributeError, method, 1)
+    self.assertRaises(AttributeError, method, a=1)
+    self.assertRaises(AttributeError, method, b=1)
+    method(1, 2)
+    method(1, b=2)
+    method(a=1, b=2)
+    method(b=2, a=1)
+    self.assertRaises(AttributeError, method, b=2, c=3)
+    self.assertRaises(AttributeError, method, a=1, b=2, c=3)
+    self.assertRaises(AttributeError, method, 1, 2, 3)
+    self.assertRaises(AttributeError, method, 1, 2, 3, 4)
+    self.assertRaises(AttributeError, method, 3, a=1, b=2)
+
+  def testOneDefaultValue(self):
+    method = mox.MockMethod('OneDefaultValue', [], False,
+                            CheckCallTestClass.OneDefaultValue)
+    method()
+    method(1)
+    method(a=1)
+    self.assertRaises(AttributeError, method, b=1)
+    self.assertRaises(AttributeError, method, 1, 2)
+    self.assertRaises(AttributeError, method, 1, a=2)
+    self.assertRaises(AttributeError, method, 1, b=2)
+
+  def testTwoDefaultValues(self):
+    method = mox.MockMethod('TwoDefaultValues', [], False,
+                            CheckCallTestClass.TwoDefaultValues)
+    self.assertRaises(AttributeError, method)
+    self.assertRaises(AttributeError, method, c=3)
+    self.assertRaises(AttributeError, method, 1)
+    self.assertRaises(AttributeError, method, 1, d=4)
+    self.assertRaises(AttributeError, method, 1, d=4, c=3)
+    method(1, 2)
+    method(a=1, b=2)
+    method(1, 2, 3)
+    method(1, 2, 3, 4)
+    method(1, 2, c=3)
+    method(1, 2, c=3, d=4)
+    method(1, 2, d=4, c=3)
+    method(d=4, c=3, a=1, b=2)
+    self.assertRaises(AttributeError, method, 1, 2, 3, 4, 5)
+    self.assertRaises(AttributeError, method, 1, 2, e=9)
+    self.assertRaises(AttributeError, method, a=1, b=2, e=9)
+
+  def testArgs(self):
+    method = mox.MockMethod('Args', [], False, CheckCallTestClass.Args)
+    self.assertRaises(AttributeError, method)
+    self.assertRaises(AttributeError, method, 1)
+    method(1, 2)
+    method(a=1, b=2)
+    method(1, 2, 3)
+    method(1, 2, 3, 4)
+    self.assertRaises(AttributeError, method, 1, 2, a=3)
+    self.assertRaises(AttributeError, method, 1, 2, c=3)
+
+  def testKwargs(self):
+    method = mox.MockMethod('Kwargs', [], False, CheckCallTestClass.Kwargs)
+    self.assertRaises(AttributeError, method)
+    method(1)
+    method(1, 2)
+    method(a=1, b=2)
+    method(b=2, a=1)
+    self.assertRaises(AttributeError, method, 1, 2, 3)
+    self.assertRaises(AttributeError, method, 1, 2, a=3)
+    method(1, 2, c=3)
+    method(a=1, b=2, c=3)
+    method(c=3, a=1, b=2)
+    method(a=1, b=2, c=3, d=4)
+    self.assertRaises(AttributeError, method, 1, 2, 3, 4)
+
+  def testArgsAndKwargs(self):
+    method = mox.MockMethod('ArgsAndKwargs', [], False,
+                            CheckCallTestClass.ArgsAndKwargs)
+    self.assertRaises(AttributeError, method)
+    method(1)
+    method(1, 2)
+    method(1, 2, 3)
+    method(a=1)
+    method(1, b=2)
+    self.assertRaises(AttributeError, method, 1, a=2)
+    method(b=2, a=1)
+    method(c=3, b=2, a=1)
+    method(1, 2, c=3)
+
+
+class CheckCallTestClass(object):
+  def NoParameters(self):
+    pass
+
+  def OneParameter(self, a):
+    pass
+
+  def TwoParameters(self, a, b):
+    pass
+
+  def OneDefaultValue(self, a=1):
+    pass
+
+  def TwoDefaultValues(self, a, b, c=1, d=2):
+    pass
+
+  def Args(self, a, b, *args):
+    pass
+
+  def Kwargs(self, a, b=2, **kwargs):
+    pass
+
+  def ArgsAndKwargs(self, a, *args, **kwargs):
+    pass
+
+
 class MockObjectTest(unittest.TestCase):
   """Verify that the MockObject class works as exepcted."""
 
