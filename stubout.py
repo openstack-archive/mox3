@@ -118,8 +118,11 @@ class StubOutForTesting:
     old_child = getattr(parent, child_name)
 
     old_attribute = parent.__dict__.get(child_name)
-    if old_attribute is not None and isinstance(old_attribute, staticmethod):
-      old_child = staticmethod(old_child)
+    if old_attribute is not None:
+      if isinstance(old_attribute, staticmethod):
+        old_child = staticmethod(old_child)
+      elif isinstance(old_attribute, classmethod):
+        old_child = classmethod(old_child.im_func)
 
     self.cache.append((parent, old_child, child_name))
     setattr(parent, child_name, new_child)
