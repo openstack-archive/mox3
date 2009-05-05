@@ -533,6 +533,10 @@ class MockAnythingTest(unittest.TestCase):
 
     self.mock_object._Verify()
 
+  def testIsReprable(self):
+    """Test that MockAnythings can be repr'd without causing a failure."""
+    self.failUnless('MockAnything' in repr(self.mock_object))
+
 
 class MethodCheckerTest(unittest.TestCase):
   """Tests MockMethod's use of MethodChecker method."""

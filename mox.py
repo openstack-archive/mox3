@@ -273,6 +273,12 @@ class MockAnything:
     """ """
     self._Reset()
 
+  def __str__(self):
+    return "<MockAnything instance at %s>" % id(self)
+
+  def __repr__(self):
+    return self.__str__()
+
   def __getattr__(self, method_name):
     """Intercept method calls on this object.
 
