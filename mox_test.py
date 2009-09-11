@@ -269,6 +269,7 @@ class IsATest(unittest.TestCase):
     stringIO = cStringIO.StringIO()
     self.assert_(isA == stringIO)
 
+
 class IsAlmostTest(unittest.TestCase):
   """Verify IsAlmost correctly checks equality of floating point numbers."""
 
@@ -291,6 +292,7 @@ class IsAlmostTest(unittest.TestCase):
     self.assertNotEquals(mox.IsAlmost(1.8999999999), '1.9')
     self.assertNotEquals(mox.IsAlmost('1.8999999999'), 1.9)
     self.assertNotEquals(mox.IsAlmost('1.8999999999'), '1.9')
+
 
 class MockMethodTest(unittest.TestCase):
   """Test class to verify that the MockMethod class is working correctly."""
@@ -424,6 +426,10 @@ class MockAnythingTest(unittest.TestCase):
 
   def setUp(self):
     self.mock_object = mox.MockAnything()
+
+  def testRepr(self):
+    """Calling repr on a MockAnything instance must work."""
+    self.assertEqual('<MockAnything instance>', repr(self.mock_object))
 
   def testSetupMode(self):
     """Verify the mock will accept any call."""
@@ -793,10 +799,7 @@ class MockObjectTest(unittest.TestCase):
     self.assertRaises(mox.ExpectedMethodCallsError, dummy._Verify)
 
   def testMockSetItem_ExpectedNoSetItem_Success(self):
-    """Test that __setitem__() gets mocked in Dummy.
-
-    In this test, _Verify() succeeds.
-    """
+    """Test that __setitem__() gets mocked in Dummy."""
     dummy = mox.MockObject(TestClass)
     # NOT doing dummy['X'] = 'Y'
 
@@ -804,8 +807,6 @@ class MockObjectTest(unittest.TestCase):
 
     def call(): dummy['X'] = 'Y'
     self.assertRaises(mox.UnexpectedMethodCallError, call)
-
-    dummy._Verify()
 
   def testMockSetItem_ExpectedNoSetItem_NoSuccess(self):
     """Test that __setitem__() gets mocked in Dummy.
@@ -834,8 +835,25 @@ class MockObjectTest(unittest.TestCase):
 
     dummy._Verify()
 
+  def testMockSetItem_WithSubClassOfNewStyleClass(self):
+    class NewStyleTestClass(object):
+      def __init__(self):
+        self.my_dict = {}
+
+      def __setitem__(self, key, value):
+        self.my_dict[key], value
+
+    class TestSubClass(NewStyleTestClass):
+      pass
+
+    dummy = mox.MockObject(TestSubClass)
+    dummy[1] = 2
+    dummy._Replay()
+    dummy[1] = 2
+    dummy._Verify()
+
   def testMockGetItem_ExpectedGetItem_Success(self):
-    """Test that __setitem__() gets mocked in Dummy.
+    """Test that __getitem__() gets mocked in Dummy.
 
     In this test, _Verify() succeeds.
     """
@@ -849,7 +867,7 @@ class MockObjectTest(unittest.TestCase):
     dummy._Verify()
 
   def testMockGetItem_ExpectedGetItem_NoSuccess(self):
-    """Test that __setitem__() gets mocked in Dummy.
+    """Test that __getitem__() gets mocked in Dummy.
 
     In this test, _Verify() fails.
     """
@@ -863,10 +881,7 @@ class MockObjectTest(unittest.TestCase):
     self.assertRaises(mox.ExpectedMethodCallsError, dummy._Verify)
 
   def testMockGetItem_ExpectedNoGetItem_NoSuccess(self):
-    """Test that __setitem__() gets mocked in Dummy.
-
-    In this test, _Verify() succeeds.
-    """
+    """Test that __getitem__() gets mocked in Dummy."""
     dummy = mox.MockObject(TestClass)
     # NOT doing dummy['X']
 
@@ -875,10 +890,8 @@ class MockObjectTest(unittest.TestCase):
     def call(): return dummy['X']
     self.assertRaises(mox.UnexpectedMethodCallError, call)
 
-    dummy._Verify()
-
   def testMockGetItem_ExpectedGetItem_NonmatchingParameters(self):
-    """Test that __setitem__() fails if other parameters are expected."""
+    """Test that __getitem__() fails if other parameters are expected."""
     dummy = mox.MockObject(TestClass)
     dummy['X'].AndReturn('value')
 
@@ -890,6 +903,34 @@ class MockObjectTest(unittest.TestCase):
 
     dummy._Verify()
 
+  def testMockGetItem_WithSubClassOfNewStyleClass(self):
+    class NewStyleTestClass(object):
+      def __getitem__(self, key):
+        return {1: '1', 2: '2'}[key]
+
+    class TestSubClass(NewStyleTestClass):
+      pass
+
+    dummy = mox.MockObject(TestSubClass)
+    dummy[1].AndReturn('3')
+
+    dummy._Replay()
+    self.assertEquals('3', dummy.__getitem__(1))
+    dummy._Verify()
+
+  def testMockIter_ExpectedIter_Success(self):
+    """Test that __iter__() gets mocked in Dummy.
+
+    In this test, _Verify() succeeds.
+    """
+    dummy = mox.MockObject(TestClass)
+    iter(dummy).AndReturn(iter(['X', 'Y']))
+
+    dummy._Replay()
+
+    self.assertEqual([x for x in dummy], ['X', 'Y'])
+
+    dummy._Verify()
   def testMockContains_ExpectedContains_Success(self):
     """Test that __contains__ gets mocked in Dummy.
 
@@ -930,6 +971,65 @@ class MockObjectTest(unittest.TestCase):
     self.assertRaises(mox.UnexpectedMethodCallError, call)
 
     dummy._Verify()
+
+  def testMockIter_ExpectedIter_NoSuccess(self):
+    """Test that __iter__() gets mocked in Dummy.
+
+    In this test, _Verify() fails.
+    """
+    dummy = mox.MockObject(TestClass)
+    iter(dummy).AndReturn(iter(['X', 'Y']))
+
+    dummy._Replay()
+
+    # NOT doing self.assertEqual([x for x in dummy], ['X', 'Y'])
+
+    self.assertRaises(mox.ExpectedMethodCallsError, dummy._Verify)
+
+  def testMockIter_ExpectedNoIter_NoSuccess(self):
+    """Test that __iter__() gets mocked in Dummy."""
+    dummy = mox.MockObject(TestClass)
+    # NOT doing iter(dummy)
+
+    dummy._Replay()
+
+    def call(): return [x for x in dummy]
+    self.assertRaises(mox.UnexpectedMethodCallError, call)
+
+  def testMockIter_ExpectedGetItem_Success(self):
+    """Test that __iter__() gets mocked in Dummy using getitem."""
+    dummy = mox.MockObject(SubscribtableNonIterableClass)
+    dummy[0].AndReturn('a')
+    dummy[1].AndReturn('b')
+    dummy[2].AndRaise(IndexError)
+
+    dummy._Replay()
+    self.assertEquals(['a', 'b'], [x for x in dummy])
+    dummy._Verify()
+
+  def testMockIter_ExpectedNoGetItem_NoSuccess(self):
+    """Test that __iter__() gets mocked in Dummy using getitem."""
+    dummy = mox.MockObject(SubscribtableNonIterableClass)
+    # NOT doing dummy[index]
+
+    dummy._Replay()
+    function = lambda: [x for x in dummy]
+    self.assertRaises(mox.UnexpectedMethodCallError, function)
+
+  def testMockGetIter_WithSubClassOfNewStyleClass(self):
+    class NewStyleTestClass(object):
+      def __iter__(self):
+        return iter([1, 2, 3])
+
+    class TestSubClass(NewStyleTestClass):
+      pass
+
+    dummy = mox.MockObject(TestSubClass)
+    iter(dummy).AndReturn(iter(['a', 'b']))
+    dummy._Replay()
+    self.assertEquals(['a', 'b'], [x for x in dummy])
+    dummy._Verify()
+
 
 class MoxTest(unittest.TestCase):
   """Verify Mox works correctly."""
@@ -972,6 +1072,16 @@ class MoxTest(unittest.TestCase):
   def testCallableObject(self):
     """Test recording calls to a callable object works."""
     mock_obj = self.mox.CreateMock(CallableClass)
+    mock_obj("foo").AndReturn("qux")
+    self.mox.ReplayAll()
+
+    ret_val = mock_obj("foo")
+    self.assertEquals("qux", ret_val)
+    self.mox.VerifyAll()
+
+  def testInheritedCallableObject(self):
+    """Test recording calls to an object inheriting from a callable object."""
+    mock_obj = self.mox.CreateMock(InheritsFromCallable)
     mock_obj("foo").AndReturn("qux")
     self.mox.ReplayAll()
 
@@ -1106,12 +1216,12 @@ class MoxTest(unittest.TestCase):
     mock_obj.Method(3)
     mock_obj.Method(3)
 
+    self.mox.VerifyAll()
+
     self.assertEquals(9, actual_one)
     self.assertEquals(9, second_one) # Repeated calls should return same number.
     self.assertEquals(10, actual_two)
     self.assertEquals(42, actual_three)
-
-    self.mox.VerifyAll()
 
   def testMultipleTimesUsingIsAParameter(self):
     """Test if MultipleTimesGroup works with a IsA parameter."""
@@ -1126,10 +1236,39 @@ class MoxTest(unittest.TestCase):
     second_one = mock_obj.Method("2") # This tests MultipleTimes.
     mock_obj.Close()
 
+    self.mox.VerifyAll()
+
     self.assertEquals(9, actual_one)
     self.assertEquals(9, second_one) # Repeated calls should return same number.
 
+  def testMutlipleTimesUsingFunc(self):
+    """Test that the Func is not evaluated more times than necessary.
+
+    If a Func() has side effects, it can cause a passing test to fail.
+    """
+
+    self.counter = 0
+    def MyFunc(actual_str):
+      """Increment the counter if actual_str == 'foo'."""
+      if actual_str == 'foo':
+        self.counter += 1
+      return True
+
+    mock_obj = self.mox.CreateMockAnything()
+    mock_obj.Open()
+    mock_obj.Method(mox.Func(MyFunc)).MultipleTimes()
+    mock_obj.Close()
+    self.mox.ReplayAll()
+
+    mock_obj.Open()
+    mock_obj.Method('foo')
+    mock_obj.Method('foo')
+    mock_obj.Method('not-foo')
+    mock_obj.Close()
+
     self.mox.VerifyAll()
+
+    self.assertEquals(2, self.counter)
 
   def testMultipleTimesThreeMethods(self):
     """Test if MultipleTimesGroup works with three or more methods."""
@@ -1268,6 +1407,12 @@ class MoxTest(unittest.TestCase):
     self.assertEquals('foo', actual)
     self.failIf(isinstance(test_obj.OtherValidCall, mox.MockAnything))
 
+  def testWarnsUserIfMockingMock(self):
+    """Test that user is warned if they try to stub out a MockAnything."""
+    self.mox.StubOutWithMock(TestClass, 'MyStaticMethod')
+    self.assertRaises(TypeError, self.mox.StubOutWithMock, TestClass,
+                      'MyStaticMethod')
+
   def testStubOutObject(self):
     """Test than object is replaced with a Mock."""
 
@@ -1301,6 +1446,7 @@ class MoxTest(unittest.TestCase):
       self.assertEquals('MockMethod has no attribute "ShowMeTheMoney". '
           'Did you remember to put your mocks in replay mode?', str(e))
 
+
 class ReplayTest(unittest.TestCase):
   """Verify Replay works properly."""
 
@@ -1310,6 +1456,7 @@ class ReplayTest(unittest.TestCase):
     self.assertFalse(mock_obj._replay_mode)
     mox.Replay(mock_obj)
     self.assertTrue(mock_obj._replay_mode)
+
 
 class MoxTestBaseTest(unittest.TestCase):
   """Verify that all tests in a class derived from MoxTestBase are wrapped."""
@@ -1524,6 +1671,8 @@ class TestClass:
      """Returns True if d contains the key."""
      return key in self.d
 
+  def __iter__(self):
+    pass
 
 class ChildClass(TestClass):
   """This inherits from TestClass."""
@@ -1542,6 +1691,17 @@ class CallableClass(object):
 
   def __call__(self, param):
     return param
+
+
+class SubscribtableNonIterableClass(object):
+  def __getitem__(self, index):
+    raise IndexError
+
+
+class InheritsFromCallable(CallableClass):
+  """This class should also be mockable; it inherits from a callable class."""
+
+  pass
 
 
 if __name__ == '__main__':

@@ -33,6 +33,11 @@ prematurely without calling some cleanup method!)  The verify phase
 ensures that every expected method was called; otherwise, an exception
 will be raised.
 
+WARNING! Mock objects created by Mox are not thread-safe.  If you are
+call a mock in multiple threads, it should be guarded by a mutex.
+
+TODO(stevepm): Add the option to make mocks thread-safe!
+
 Suggested usage / workflow:
 
   # Create Mox factory
@@ -57,6 +62,7 @@ Suggested usage / workflow:
 """
 
 from collections import deque
+import difflib
 import inspect
 import re
 import types
@@ -117,12 +123,17 @@ class UnexpectedMethodCallError(Error):
     """
 
     Error.__init__(self)
-    self._unexpected_method = unexpected_method
-    self._expected = expected
+    if expected is None:
+      self._str = "Unexpected method call %s" % (unexpected_method,)
+    else:
+      differ = difflib.Differ()
+      diff = differ.compare(str(unexpected_method).splitlines(True),
+                            str(expected).splitlines(True))
+      self._str = ("Unexpected method call.  unexpected:-  expected:+\n%s"
+                   % ("\n".join(diff),))
 
   def __str__(self):
-    return "Unexpected method call: %s.  Expecting: %s" % \
-      (self._unexpected_method, self._expected)
+    return self._str
 
 
 class UnknownMethodCallError(Error):
@@ -174,13 +185,16 @@ class Mox(object):
     self._mock_objects.append(new_mock)
     return new_mock
 
-  def CreateMockAnything(self):
+  def CreateMockAnything(self, description=None):
     """Create a mock that will accept any method calls.
 
     This does not enforce an interface.
-    """
 
-    new_mock = MockAnything()
+    Args:
+      description: str. Optionally, a descriptive name for the mock object being
+        created, for debugging output purposes.
+    """
+    new_mock = MockAnything(description=description)
     self._mock_objects.append(new_mock)
     return new_mock
 
@@ -218,10 +232,16 @@ class Mox(object):
     """
 
     attr_to_replace = getattr(obj, attr_name)
+
+    # Check for a MockAnything. This could cause confusing problems later on.
+    if attr_to_replace == MockAnything():
+      raise TypeError('Cannot mock a MockAnything! Did you remember to '
+                      'call UnsetStubs in your previous test?')
+
     if type(attr_to_replace) in self._USE_MOCK_OBJECT and not use_mock_anything:
       stub = self.CreateMock(attr_to_replace)
     else:
-      stub = self.CreateMockAnything()
+      stub = self.CreateMockAnything(description='Stub for %s' % attr_to_replace)
 
     self.stubs.Set(obj, attr_name, stub)
 
@@ -269,15 +289,21 @@ class MockAnything:
   This is helpful for mocking classes that do not provide a public interface.
   """
 
-  def __init__(self):
-    """ """
+  def __init__(self, description=None):
+    """Initialize a new MockAnything.
+
+    Args:
+      description: str. Optionally, a descriptive name for the mock object being
+        created, for debugging output purposes.
+    """
+    self._description = description
     self._Reset()
 
   def __str__(self):
     return "<MockAnything instance at %s>" % id(self)
 
   def __repr__(self):
-    return self.__str__()
+    return '<MockAnything instance>'
 
   def __getattr__(self, method_name):
     """Intercept method calls on this object.
@@ -310,7 +336,8 @@ class MockAnything:
     """
 
     return MockMethod(method_name, self._expected_calls_queue,
-                      self._replay_mode, method_to_mock=method_to_mock)
+                      self._replay_mode, method_to_mock=method_to_mock,
+                      description=self._description)
 
   def __nonzero__(self):
     """Return 1 for nonzero so the mock can be used as a conditional."""
@@ -449,10 +476,8 @@ class MockObject(MockAnything, object):
         __setitem__.
 
     """
-    setitem = self._class_to_mock.__dict__.get('__setitem__', None)
-
     # Verify the class supports item assignment.
-    if setitem is None:
+    if '__setitem__' not in dir(self._class_to_mock):
       raise TypeError('object does not support item assignment')
 
     # If we are in replay mode then simply call the mock __setitem__ method.
@@ -477,13 +502,11 @@ class MockObject(MockAnything, object):
     Raises:
       TypeError if the underlying class is not subscriptable.
       UnexpectedMethodCallError if the object does not expect the call to
-        __setitem__.
+        __getitem__.
 
     """
-    getitem = self._class_to_mock.__dict__.get('__getitem__', None)
-
     # Verify the class supports item assignment.
-    if getitem is None:
+    if '__getitem__' not in dir(self._class_to_mock):
       raise TypeError('unsubscriptable object')
 
     # If we are in replay mode then simply call the mock __getitem__ method.
@@ -494,6 +517,47 @@ class MockObject(MockAnything, object):
 
     # Otherwise, create a mock method __getitem__.
     return self._CreateMockMethod('__getitem__')(key)
+
+  def __iter__(self):
+    """Provide custom logic for mocking classes that are iterable.
+
+    Returns:
+      Expected return value in replay mode.  A MockMethod object for the
+      __iter__ method that has already been called if not in replay mode.
+
+    Raises:
+      TypeError if the underlying class is not iterable.
+      UnexpectedMethodCallError if the object does not expect the call to
+        __iter__.
+
+    """
+    methods = dir(self._class_to_mock)
+
+    # Verify the class supports iteration.
+    if '__iter__' not in methods:
+      # If it doesn't have iter method and we are in replay method, then try to
+      # iterate using subscripts.
+      if '__getitem__' not in methods or not self._replay_mode:
+        raise TypeError('not iterable object')
+      else:
+        results = []
+        index = 0
+        try:
+          while True:
+            results.append(self[index])
+            index += 1
+        except IndexError:
+          return iter(results)
+
+    # If we are in replay mode then simply call the mock __iter__ method.
+    if self._replay_mode:
+      return MockMethod('__iter__', self._expected_calls_queue,
+                        self._replay_mode)()
+
+
+    # Otherwise, create a mock method __iter__.
+    return self._CreateMockMethod('__iter__')()
+
 
   def __contains__(self, key):
     """Provide custom logic for mocking classes that contain items.
@@ -525,9 +589,9 @@ class MockObject(MockAnything, object):
   def __call__(self, *params, **named_params):
     """Provide custom logic for mocking classes that are callable."""
 
-    # Verify the class we are mocking is callable
-    callable = self._class_to_mock.__dict__.get('__call__', None)
-    if callable is None:
+    # Verify the class we are mocking is callable.
+    callable = hasattr(self._class_to_mock, '__call__')
+    if not callable:
       raise TypeError('Not callable')
 
     # Because the call is happening directly on this object instead of a method,
@@ -644,7 +708,8 @@ class MockMethod(object):
   signature) matches the expected method.
   """
 
-  def __init__(self, method_name, call_queue, replay_mode, method_to_mock=None):
+  def __init__(self, method_name, call_queue, replay_mode,
+               method_to_mock=None, description=None):
     """Construct a new mock method.
 
     Args:
@@ -654,10 +719,13 @@ class MockMethod(object):
       # replay_mode: False if we are recording, True if we are verifying calls
       #     against the call queue.
       # method_to_mock: The actual method being mocked, used for introspection.
+      # description: optionally, a descriptive name for this method. Typically
+      #     this is equal to the descriptive name of the method's class.
       method_name: str
       call_queue: list or deque
       replay_mode: bool
       method_to_mock: a method object
+      description: str or None
     """
 
     self._name = method_name
@@ -665,6 +733,7 @@ class MockMethod(object):
     if not isinstance(call_queue, deque):
       self._call_queue = deque(self._call_queue)
     self._replay_mode = replay_mode
+    self._description = description
 
     self._params = None
     self._named_params = None
@@ -715,6 +784,16 @@ class MockMethod(object):
     raise AttributeError('MockMethod has no attribute "%s". '
         'Did you remember to put your mocks in replay mode?' % name)
 
+  def __iter__(self):
+    """Raise a TypeError with a helpful message."""
+    raise TypeError('MockMethod cannot be iterated. '
+                    'Did you remember to put your mocks in replay mode?')
+
+  def next(self):
+    """Raise a TypeError with a helpful message."""
+    raise TypeError('MockMethod cannot be iterated. '
+                    'Did you remember to put your mocks in replay mode?')
+
   def _PopNextMethod(self):
     """Pop the next method from our call queue."""
     try:
@@ -753,8 +832,10 @@ class MockMethod(object):
     params = ', '.join(
         [repr(p) for p in self._params or []] +
         ['%s=%r' % x for x in sorted((self._named_params or {}).items())])
-    desc = "%s(%s) -> %r" % (self._name, params, self._return_value)
-    return desc
+    full_desc = "%s(%s) -> %r" % (self._name, params, self._return_value)
+    if self._description:
+      full_desc = "%s.%s" % (self._description, full_desc)
+    return full_desc
 
   def __eq__(self, rhs):
     """Test whether this MockMethod is equivalent to another MockMethod.
@@ -1442,7 +1523,7 @@ class MultipleTimesGroup(MethodGroup):
   def __init__(self, group_name):
     super(MultipleTimesGroup, self).__init__(group_name)
     self._methods = set()
-    self._methods_called = set()
+    self._methods_left = set()
 
   def AddMethod(self, mock_method):
     """Add a method to this group.
@@ -1452,6 +1533,7 @@ class MultipleTimesGroup(MethodGroup):
     """
 
     self._methods.add(mock_method)
+    self._methods_left.add(mock_method)
 
   def MethodCalled(self, mock_method):
     """Remove a method call from the group.
@@ -1471,10 +1553,9 @@ class MultipleTimesGroup(MethodGroup):
 
     # Check to see if this method exists, and if so add it to the set of
     # called methods.
-
     for method in self._methods:
       if method == mock_method:
-        self._methods_called.add(mock_method)
+        self._methods_left.discard(method)
         # Always put this group back on top of the queue, because we don't know
         # when we are done.
         mock_method._call_queue.appendleft(self)
@@ -1488,18 +1569,7 @@ class MultipleTimesGroup(MethodGroup):
 
   def IsSatisfied(self):
     """Return True if all methods in this group are called at least once."""
-    # NOTE(psycho): We can't use the simple set difference here because we want
-    # to match different parameters which are considered the same e.g. IsA(str)
-    # and some string. This solution is O(n^2) but n should be small.
-    tmp = self._methods.copy()
-    for called in self._methods_called:
-      for expected in tmp:
-        if called == expected:
-          tmp.remove(expected)
-          if not tmp:
-            return True
-          break
-    return False
+    return len(self._methods_left) == 0
 
 
 class MoxMetaTestBase(type):
