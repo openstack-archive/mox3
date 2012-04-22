@@ -114,7 +114,7 @@ class CallableClass(object):
   def __call__(self, one):
     return 'Not mock'
 
-  def Value():
+  def Value(self):
     return 'Not mock'
 
 
