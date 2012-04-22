@@ -69,8 +69,14 @@ import inspect
 import re
 import types
 import unittest
+import collections
 
 import stubout
+
+
+def _callable(obj):
+  return isinstance(obj, collections.Callable)
+
 
 class Error(AssertionError):
   """Base exception for this module."""
@@ -220,7 +226,7 @@ class UnexpectedMockCreationError(Error):
 
     if self._named_params:
       error += ", " + ", ".join(["%s=%s" % (k, v) for k, v in
-                                 self._named_params.iteritems()])
+                                 self._named_params.items()])
 
     error += ")"
     return error
@@ -473,6 +479,10 @@ class MockAnything:
     """Return 1 for nonzero so the mock can be used as a conditional."""
 
     return 1
+  
+  def __bool__(self):
+    """Return True for nonzero so the mock can be used as a conditional."""
+    return True
 
   def __eq__(self, rhs):
     """Provide custom logic to compare objects."""
@@ -558,7 +568,7 @@ class MockObject(MockAnything, object):
 
     for method in dir(class_to_mock):
       attr = getattr(class_to_mock, method)
-      if callable(attr):
+      if _callable(attr):
         self._known_methods.add(method)
       elif not (type(attr) is property):
         # treating properties as class vars makes little sense.
@@ -750,8 +760,8 @@ class MockObject(MockAnything, object):
     """Provide custom logic for mocking classes that are callable."""
 
     # Verify the class we are mocking is callable.
-    callable = hasattr(self._class_to_mock, '__call__')
-    if not callable:
+    is_callable = hasattr(self._class_to_mock, '__call__')
+    if not is_callable:
       raise TypeError('Not callable')
 
     # Because the call is happening directly on this object instead of a method,
@@ -950,7 +960,7 @@ class MethodSignatureChecker(object):
       self._RecordArgumentGiven(arg_name, arg_status)
 
     # Ensure all the required arguments have been given.
-    still_needed = [k for k, v in arg_status.iteritems()
+    still_needed = [k for k, v in arg_status.items()
                     if v == MethodSignatureChecker._NEEDED]
     if still_needed:
       raise AttributeError('No values given for arguments: %s'
@@ -1051,6 +1061,11 @@ class MockMethod(object):
                     'Did you remember to put your mocks in replay mode?')
 
   def next(self):
+    """Raise a TypeError with a helpful message."""
+    raise TypeError('MockMethod cannot be iterated. '
+                    'Did you remember to put your mocks in replay mode?')
+    
+  def __next__(self):
     """Raise a TypeError with a helpful message."""
     raise TypeError('MockMethod cannot be iterated. '
                     'Did you remember to put your mocks in replay mode?')
@@ -1995,7 +2010,8 @@ class MoxMetaTestBase(type):
           d[attr_name] = getattr(base, attr_name)
 
     for func_name, func in d.items():
-      if func_name.startswith('test') and callable(func):
+      if func_name.startswith('test') and _callable(func):
+
         setattr(cls, func_name, MoxMetaTestBase.CleanUpTest(cls, func))
 
   @staticmethod
@@ -2037,7 +2053,9 @@ class MoxMetaTestBase(type):
     return new_method
 
 
-class MoxTestBase(unittest.TestCase):
+_MoxTestBase = MoxMetaTestBase('_MoxTestBase', (unittest.TestCase, ), {})
+
+class MoxTestBase(_MoxTestBase):
   """Convenience test class to make stubbing easier.
 
   Sets up a "mox" attribute which is an instance of Mox (any mox tests will
@@ -2046,8 +2064,6 @@ class MoxTestBase(unittest.TestCase):
   mock methods have been called at the end of each test, eliminating boilerplate
   code.
   """
-
-  __metaclass__ = MoxMetaTestBase
 
   def setUp(self):
     super(MoxTestBase, self).setUp()
