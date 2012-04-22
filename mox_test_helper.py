@@ -74,3 +74,69 @@ class ExampleMoxTest(mox.MoxTestBase, ExampleMoxTestMixin):
     os.stat(self.DIR_PATH)
     self.mox.ReplayAll()
     os.stat(self.DIR_PATH)
+
+  def testHasStubs(self):
+    listdir_list = []
+
+    def MockListdir(directory):
+      listdir_list.append(directory)
+
+    self.stubs.Set(os, 'listdir', MockListdir)
+    os.listdir(self.DIR_PATH)
+    self.assertEqual([self.DIR_PATH], listdir_list)
+
+
+class TestClassFromAnotherModule(object):
+
+  def __init__(self):
+    return None
+
+  def Value(self):
+    return 'Not mock'
+
+
+class ChildClassFromAnotherModule(TestClassFromAnotherModule):
+  """A child class of TestClassFromAnotherModule.
+
+  Used to test stubbing out unbound methods, where child classes
+  are eventually bound.
+  """
+
+  def __init__(self):
+    TestClassFromAnotherModule.__init__(self)
+
+
+class CallableClass(object):
+
+  def __init__(self, one, two, nine=None):
+    pass
+
+  def __call__(self, one):
+    return 'Not mock'
+
+  def Value():
+    return 'Not mock'
+
+
+def MyTestFunction(one, two, nine=None):
+  pass
+
+
+class ExampleClass(object):
+  def __init__(self, foo='bar'):
+    pass
+
+  def TestMethod(self, one, two, nine=None):
+    pass
+
+  def NamedParams(self, ignore, foo='bar', baz='qux'):
+    pass
+
+  def SpecialArgs(self, *args, **kwargs):
+    pass
+
+
+# This class is used to test stubbing out __init__ of a parent class.
+class ChildExampleClass(ExampleClass):
+  def __init__(self):
+    ExampleClass.__init__(self)
