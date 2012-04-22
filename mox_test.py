@@ -2271,9 +2271,6 @@ class TestClass:
   def __PrivateCall(self):
     pass
 
-  def __getitem__(self, key):
-    pass
-
   def __DoNotMock(self):
     pass
 
