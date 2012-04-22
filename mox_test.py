@@ -2286,8 +2286,8 @@ class TestClass:
     self.d[key] = value
 
   def __contains__(self, key):
-     """Returns True if d contains the key."""
-     return key in self.d
+    """Returns True if d contains the key."""
+    return key in self.d
 
   def __iter__(self):
     pass
