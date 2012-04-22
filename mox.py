@@ -231,13 +231,7 @@ class Mox(object):
 
   # A list of types that should be stubbed out with MockObjects (as
   # opposed to MockAnythings).
-  _USE_MOCK_OBJECT = [types.ClassType, types.FunctionType, types.InstanceType,
-                      types.ModuleType, types.ObjectType, types.TypeType,
-                      types.MethodType, types.UnboundMethodType,
-                      ]
-
-  # A list of types that may be stubbed out with a MockObjectFactory.
-  _USE_MOCK_FACTORY = [types.ClassType, types.ObjectType, types.TypeType]
+  _USE_MOCK_OBJECT = [types.FunctionType, types.ModuleType, types.MethodType]
 
   def __init__(self):
     """Initialize a new Mox."""
@@ -315,8 +309,11 @@ class Mox(object):
     if attr_type == MockAnything or attr_type == MockObject:
       raise TypeError('Cannot mock a MockAnything! Did you remember to '
                       'call UnsetStubs in your previous test?')
-
-    if attr_type in self._USE_MOCK_OBJECT and not use_mock_anything:
+    
+    type_check = (
+        attr_type in self._USE_MOCK_OBJECT or inspect.isclass(attr_to_replace)
+        or isinstance(attr_to_replace, object))
+    if type_check and not use_mock_anything:
       stub = self.CreateMock(attr_to_replace)
     else:
       stub = self.CreateMockAnything(description='Stub for %s' % attr_to_replace)
@@ -368,8 +365,8 @@ class Mox(object):
     if attr_type == MockAnything or attr_type == MockObject:
       raise TypeError('Cannot mock a MockAnything! Did you remember to '
                       'call UnsetStubs in your previous test?')
-
-    if attr_type not in self._USE_MOCK_FACTORY:
+    
+    if not inspect.isclass(attr_to_replace):
       raise TypeError('Given attr is not a Class.  Use StubOutWithMock.')
 
     factory = _MockObjectFactory(attr_to_replace, self)
@@ -1260,7 +1257,7 @@ class Comparator:
       rhs: any python object
     """
 
-    raise NotImplementedError, 'method must be implemented by a subclass.'
+    raise NotImplementedError('method must be implemented by a subclass.')
 
   def __eq__(self, rhs):
     return self.equals(rhs)
