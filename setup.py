@@ -13,15 +13,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# This file was mofified by quermit@gmail.com
 
 from distutils.core import setup
 
 setup(name='mox',
       version='0.5.3',
       py_modules=['mox', 'stubout'],
-      url='http://code.google.com/p/pymox/',
-      maintainer='pymox maintainers',
-      maintainer_email='mox-discuss@googlegroups.com',
+      url='https://github.com/quermit/pymox',
+      maintainer='quermit',
+      maintainer_email='quermit@gmail.com',
       license='Apache License, Version 2.0',
       description='Mock object framework',
       long_description='''Mox is a mock object framework for Python based on the
