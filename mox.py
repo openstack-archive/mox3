@@ -1640,17 +1640,17 @@ class SameElementsAs(Comparator):
       # This happens because Mox uses __eq__ both to check object equality (in
       # MethodSignatureChecker) and to invoke Comparators.
       return False
-
+    
     try:
-      expected = dict([(element, None) for element in self._expected_list])
-      actual = dict([(element, None) for element in actual_list])
+      return set(self._expected_list) == set(actual_list)
     except TypeError:
       # Fall back to slower list-compare if any of the objects are unhashable.
-      expected = self._expected_list
-      actual = actual_list
-      expected.sort()
-      actual.sort()
-    return expected == actual
+      if len(self._expected_list) != len(actual_list):
+        return False
+      for el in actual_list:
+        if el not in self._expected_list:
+          return False
+    return True
 
   def __repr__(self):
     return '<sequence with same elements as \'%s\'>' % self._expected_list
