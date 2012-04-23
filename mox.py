@@ -1117,6 +1117,9 @@ class MockMethod(object):
     if self._description:
       full_desc = "%s.%s" % (self._description, full_desc)
     return full_desc
+  
+  def __hash__(self):
+    return id(self)
 
   def __eq__(self, rhs):
     """Test whether this MockMethod is equivalent to another MockMethod.
