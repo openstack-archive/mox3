@@ -74,10 +74,6 @@ import collections
 import stubout
 
 
-def _callable(obj):
-  return isinstance(obj, collections.Callable)
-
-
 class Error(AssertionError):
   """Base exception for this module."""
 
@@ -577,7 +573,7 @@ class MockObject(MockAnything):
 
     for method in dir(class_to_mock):
       attr = getattr(class_to_mock, method)
-      if _callable(attr):
+      if callable(attr):
         self._known_methods.add(method)
       elif not (type(attr) is property):
         # treating properties as class vars makes little sense.
@@ -2019,7 +2015,7 @@ class MoxMetaTestBase(type):
           d[attr_name] = getattr(base, attr_name)
 
     for func_name, func in d.items():
-      if func_name.startswith('test') and _callable(func):
+      if func_name.startswith('test') and callable(func):
 
         setattr(cls, func_name, MoxMetaTestBase.CleanUpTest(cls, func))
 
