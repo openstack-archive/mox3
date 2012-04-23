@@ -1439,7 +1439,7 @@ class Regex(Comparator):
       # flags passed to re.compile function as the second argument
       flags: int
     """
-
+    self.flags = flags
     self.regex = re.compile(pattern, flags=flags)
 
   def equals(self, rhs):
@@ -1456,8 +1456,8 @@ class Regex(Comparator):
 
   def __repr__(self):
     s = '<regular expression \'%s\'' % self.regex.pattern
-    if self.regex.flags:
-      s += ', flags=%d' % self.regex.flags
+    if self.flags:
+      s += ', flags=%d' % self.flags
     s += '>'
     return s
 
