@@ -1327,7 +1327,7 @@ class MoxTest(unittest.TestCase):
 
   def testCallOnNonCallableObject(self):
     """Test that you cannot call a non-callable object."""
-    mock_obj = self.mox.CreateMock(TestClass)
+    mock_obj = self.mox.CreateMock("string is not callable")
     self.assertRaises(TypeError, mock_obj)
 
   def testCallableObjectWithBadCall(self):
@@ -2229,7 +2229,7 @@ class MoxTestDontMockProperties(MoxTestBaseTest):
                 mock_class.prop_attr)
 
 
-class TestClass:
+class TestClass(object):
   """This class is used only for testing the mock framework"""
 
   SOME_CLASS_VAR = "test_value"

@@ -417,7 +417,7 @@ def Reset(*args):
     mock._Reset()
 
 
-class MockAnything:
+class MockAnything(object):
   """A mock that can be used to mock anything.
 
   This is helpful for mocking classes that do not provide a public interface.
@@ -457,7 +457,16 @@ class MockAnything:
         return self.__class__.__dir__.__get__(self, self.__class__)
 
     return self._CreateMockMethod(method_name)
-
+  
+  def __str__(self):
+    return self._CreateMockMethod('__str__')()
+  
+  def __call__(self, *args, **kwargs):
+    return self._CreateMockMethod('__call__')(*args, **kwargs)
+  
+  def __getitem__(self, i):
+    return self._CreateMockMethod('__getitem__')(i)
+  
   def _CreateMockMethod(self, method_name, method_to_mock=None):
     """Create a new mock method call and return it.
 
@@ -529,7 +538,7 @@ class MockAnything:
     self._replay_mode = False
 
 
-class MockObject(MockAnything, object):
+class MockObject(MockAnything):
   """A mock object that simulates the public/protected interface of a class."""
 
   def __init__(self, class_to_mock, attrs=None):
