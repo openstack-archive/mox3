@@ -18,6 +18,7 @@
 
 import inspect
 
+
 class StubOutForTesting(object):
   """Sample Usage:
      You want os.path.exists() to always return true during testing.

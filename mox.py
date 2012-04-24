@@ -82,15 +82,18 @@ class Error(AssertionError):
 
 
 class ExpectedMethodCallsError(Error):
-  """Raised when Verify() is called before all expected methods have been called
+  """Raised when an expected method wasn't called.
+
+  This can occur if Verify() is called before all expected methods have been
+  called.
   """
 
   def __init__(self, expected_methods):
     """Init exception.
 
     Args:
-      # expected_methods: A sequence of MockMethod objects that should have been
-      #   called.
+      # expected_methods: A sequence of MockMethod objects that should have
+      #   been called.
       expected_methods: [MockMethod]
 
     Raises:
@@ -119,8 +122,8 @@ class UnexpectedMethodCallError(Error):
     """Init exception.
 
     Args:
-      # unexpected_method: MockMethod that was called but was not at the head of
-      #   the expected_method queue.
+      # unexpected_method: MockMethod that was called but was not at the head
+      #   of the expected_method queue.
       # expected: MockMethod or UnorderedGroup the method should have
       #   been in.
       unexpected_method: MockMethod
@@ -268,8 +271,8 @@ class Mox(object):
     This does not enforce an interface.
 
     Args:
-      description: str. Optionally, a descriptive name for the mock object being
-        created, for debugging output purposes.
+      description: str. Optionally, a descriptive name for the mock object
+        being created, for debugging output purposes.
     """
     new_mock = MockAnything(description=description)
     self._mock_objects.append(new_mock)
@@ -280,7 +283,6 @@ class Mox(object):
 
     for mock_obj in self._mock_objects:
       mock_obj._Replay()
-
 
   def VerifyAll(self):
     """Call verify on all mock objects created."""
@@ -326,7 +328,8 @@ class Mox(object):
     if type_check and not use_mock_anything:
       stub = self.CreateMock(attr_to_replace, bounded_to=class_to_bind)
     else:
-      stub = self.CreateMockAnything(description='Stub for %s' % attr_to_replace)
+      stub = self.CreateMockAnything(
+          description='Stub for %s' % attr_to_replace)
       stub.__name__ = attr_name
 
     self.stubs.Set(obj, attr_name, stub)
@@ -432,8 +435,8 @@ class MockAnything(object):
     """Initialize a new MockAnything.
 
     Args:
-      description: str. Optionally, a descriptive name for the mock object being
-        created, for debugging output purposes.
+      description: str. Optionally, a descriptive name for the mock object
+        being created, for debugging output purposes.
     """
     self._description = description
     self._Reset()
@@ -685,7 +688,6 @@ class MockObject(MockAnything):
       return MockMethod('__setitem__', self._expected_calls_queue,
                         self._replay_mode)(key, value)
 
-
     # Otherwise, create a mock method __setitem__.
     return self._CreateMockMethod('__setitem__')(key, value)
 
@@ -713,7 +715,6 @@ class MockObject(MockAnything):
     if self._replay_mode:
       return MockMethod('__getitem__', self._expected_calls_queue,
                         self._replay_mode)(key)
-
 
     # Otherwise, create a mock method __getitem__.
     return self._CreateMockMethod('__getitem__')(key)
@@ -754,10 +755,8 @@ class MockObject(MockAnything):
       return MockMethod('__iter__', self._expected_calls_queue,
                         self._replay_mode)()
 
-
     # Otherwise, create a mock method __iter__.
     return self._CreateMockMethod('__iter__')()
-
 
   def __contains__(self, key):
     """Provide custom logic for mocking classes that contain items.
@@ -794,8 +793,8 @@ class MockObject(MockAnything):
     if not is_callable:
       raise TypeError('Not callable')
 
-    # Because the call is happening directly on this object instead of a method,
-    # the call on the mock method is made right here
+    # Because the call is happening directly on this object instead of
+    # a method, the call on the mock method is made right here
 
     # If we are mocking a Function, then use the function, and not the
     # __call__ method
@@ -983,7 +982,6 @@ class MethodSignatureChecker(object):
         except:
           param_equality = False
 
-
         if isinstance(params[0], expected) or param_equality:
           params = params[1:]
         # If the IsA() comparator is being used, we need to check the
@@ -1022,10 +1020,10 @@ class MethodSignatureChecker(object):
 class MockMethod(object):
   """Callable mock method.
 
-  A MockMethod should act exactly like the method it mocks, accepting parameters
-  and returning a value, or throwing an exception (as specified).  When this
-  method is called, it can optionally verify whether the called method (name and
-  signature) matches the expected method.
+  A MockMethod should act exactly like the method it mocks, accepting
+  parameters and returning a value, or throwing an exception (as specified).
+  When this method is called, it can optionally verify whether the called
+  method (name and signature) matches the expected method.
   """
 
   def __init__(self, method_name, call_queue, replay_mode,
@@ -1202,7 +1200,8 @@ class MockMethod(object):
     other methods are on the stack.
     """
 
-    # Remove this method from the tail of the queue so we can add it to a group.
+    # Remove this method from the tail of the queue so we can add it
+    # to a group.
     this_method = self._call_queue.pop()
     assert this_method == self
 
@@ -1259,8 +1258,8 @@ class MockMethod(object):
   def MultipleTimes(self, group_name="default"):
     """Move this method into group of calls which may be called multiple times.
 
-    A group of repeating calls must be defined together, and must be executed in
-    full before the next expected method can be called.
+    A group of repeating calls must be defined together, and must be executed
+    in full before the next expected method can be called.
 
     Args:
       group_name: the name of the unordered group.
@@ -1303,6 +1302,7 @@ class MockMethod(object):
     self._side_effects = side_effects
     return self
 
+
 class Comparator:
   """Base class for all Mox comparators.
 
@@ -1341,6 +1341,7 @@ class Comparator:
   def __ne__(self, rhs):
     return not self.equals(rhs)
 
+
 class Is(Comparator):
   """Comparison class used to check identity, instead of equality."""
 
@@ -1352,6 +1353,7 @@ class Is(Comparator):
 
   def __repr__(self):
     return "<is %r (%s)>" % (self._obj, id(self._obj))
+
 
 class IsA(Comparator):
   """This class wraps a basic Python type or class.  It is used to verify
@@ -1438,13 +1440,14 @@ class IsAlmost(Comparator):
     """
 
     try:
-      return round(rhs-self._float_value, self._places) == 0
+      return round(rhs - self._float_value, self._places) == 0
     except Exception:
       # This is probably because either float_value or rhs is not a number.
       return False
 
   def __repr__(self):
     return str(self._float_value)
+
 
 class StrContains(Comparator):
   """Comparison class used to check whether a substring exists in a
@@ -1649,7 +1652,7 @@ class ContainsAttributeValue(Comparator):
     self._value = value
 
   def equals(self, rhs):
-    """Check whether the given attribute has a matching value in the rhs object.
+    """Check if the given attribute has a matching value in the rhs object.
 
     Returns:
       bool
@@ -1713,7 +1716,7 @@ class SameElementsAs(Comparator):
 
 
 class And(Comparator):
-  """Evaluates one or more Comparators on RHS and returns an AND of the results.
+  """Evaluates one or more Comparators on RHS, returns an AND of the results.
   """
 
   def __init__(self, *args):
@@ -1924,6 +1927,7 @@ class MethodGroup(object):
   def IsSatisfied(self):
     raise NotImplementedError
 
+
 class UnorderedGroup(MethodGroup):
   """UnorderedGroup holds a set of method calls that may occur in any order.
 
@@ -2040,7 +2044,7 @@ class MultipleTimesGroup(MethodGroup):
         return self, method
 
     if self.IsSatisfied():
-      next_method = mock_method._PopNextMethod();
+      next_method = mock_method._PopNextMethod()
       return next_method, None
     else:
       raise UnexpectedMethodCallError(mock_method, self)
@@ -2083,7 +2087,7 @@ class MoxMetaTestBase(type):
     otherwise pass.
 
     Args:
-      cls: MoxTestBase or subclass; the class whose test method we are altering.
+      cls: MoxTestBase or subclass; the class whose method we are altering.
       func: method; the method of the MoxTestBase test class we wish to alter.
 
     Returns:
@@ -2116,14 +2120,15 @@ class MoxMetaTestBase(type):
 
 _MoxTestBase = MoxMetaTestBase('_MoxTestBase', (unittest.TestCase, ), {})
 
+
 class MoxTestBase(_MoxTestBase):
   """Convenience test class to make stubbing easier.
 
   Sets up a "mox" attribute which is an instance of Mox (any mox tests will
   want this), and a "stubs" attribute that is an instance of StubOutForTesting
   (needed at times). Also automatically unsets any stubs and verifies that all
-  mock methods have been called at the end of each test, eliminating boilerplate
-  code.
+  mock methods have been called at the end of each test, eliminating
+  boilerplate code.
   """
 
   def setUp(self):
