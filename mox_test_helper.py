@@ -31,6 +31,7 @@ import os
 
 import mox
 
+
 class ExampleMoxTestMixin(object):
   """Mix-in class for mox test case class.
 
