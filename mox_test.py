@@ -749,7 +749,8 @@ class MethodCheckerTest(unittest.TestCase):
 
   def testNoParameters(self):
     method = mox.MockMethod('NoParameters', [], False,
-                            CheckCallTestClass.NoParameters)
+                            CheckCallTestClass.NoParameters,
+                            class_to_bind=CheckCallTestClass)
     method()
     self.assertRaises(AttributeError, method, 1)
     self.assertRaises(AttributeError, method, 1, 2)
@@ -758,7 +759,8 @@ class MethodCheckerTest(unittest.TestCase):
 
   def testOneParameter(self):
     method = mox.MockMethod('OneParameter', [], False,
-                            CheckCallTestClass.OneParameter)
+                            CheckCallTestClass.OneParameter,
+                            class_to_bind=CheckCallTestClass)
     self.assertRaises(AttributeError, method)
     method(1)
     method(a=1)
@@ -769,7 +771,8 @@ class MethodCheckerTest(unittest.TestCase):
 
   def testTwoParameters(self):
     method = mox.MockMethod('TwoParameters', [], False,
-                            CheckCallTestClass.TwoParameters)
+                            CheckCallTestClass.TwoParameters,
+                            class_to_bind=CheckCallTestClass)
     self.assertRaises(AttributeError, method)
     self.assertRaises(AttributeError, method, 1)
     self.assertRaises(AttributeError, method, a=1)
@@ -786,7 +789,8 @@ class MethodCheckerTest(unittest.TestCase):
 
   def testOneDefaultValue(self):
     method = mox.MockMethod('OneDefaultValue', [], False,
-                            CheckCallTestClass.OneDefaultValue)
+                            CheckCallTestClass.OneDefaultValue,
+                            class_to_bind=CheckCallTestClass)
     method()
     method(1)
     method(a=1)
@@ -797,7 +801,8 @@ class MethodCheckerTest(unittest.TestCase):
 
   def testTwoDefaultValues(self):
     method = mox.MockMethod('TwoDefaultValues', [], False,
-                            CheckCallTestClass.TwoDefaultValues)
+                            CheckCallTestClass.TwoDefaultValues,
+                            class_to_bind=CheckCallTestClass)
     self.assertRaises(AttributeError, method)
     self.assertRaises(AttributeError, method, c=3)
     self.assertRaises(AttributeError, method, 1)
@@ -816,7 +821,8 @@ class MethodCheckerTest(unittest.TestCase):
     self.assertRaises(AttributeError, method, a=1, b=2, e=9)
 
   def testArgs(self):
-    method = mox.MockMethod('Args', [], False, CheckCallTestClass.Args)
+    method = mox.MockMethod('Args', [], False, CheckCallTestClass.Args,
+                            class_to_bind=CheckCallTestClass)
     self.assertRaises(AttributeError, method)
     self.assertRaises(AttributeError, method, 1)
     method(1, 2)
@@ -827,7 +833,8 @@ class MethodCheckerTest(unittest.TestCase):
     self.assertRaises(AttributeError, method, 1, 2, c=3)
 
   def testKwargs(self):
-    method = mox.MockMethod('Kwargs', [], False, CheckCallTestClass.Kwargs)
+    method = mox.MockMethod('Kwargs', [], False, CheckCallTestClass.Kwargs,
+                            class_to_bind=CheckCallTestClass)
     self.assertRaises(AttributeError, method)
     method(1)
     method(1, 2)
@@ -843,7 +850,8 @@ class MethodCheckerTest(unittest.TestCase):
 
   def testArgsAndKwargs(self):
     method = mox.MockMethod('ArgsAndKwargs', [], False,
-                            CheckCallTestClass.ArgsAndKwargs)
+                            CheckCallTestClass.ArgsAndKwargs,
+                            class_to_bind=CheckCallTestClass)
     self.assertRaises(AttributeError, method)
     method(1)
     method(1, 2)

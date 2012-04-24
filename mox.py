@@ -69,7 +69,6 @@ import inspect
 import re
 import types
 import unittest
-import collections
 
 import stubout
 
@@ -241,7 +240,7 @@ class Mox(object):
     self._mock_objects = []
     self.stubs = stubout.StubOutForTesting()
 
-  def CreateMock(self, class_to_mock, attrs=None):
+  def CreateMock(self, class_to_mock, attrs=None, bounded_to=None):
     """Create a new mock object.
 
     Args:
@@ -249,13 +248,15 @@ class Mox(object):
       class_to_mock: class
       attrs: dict of attribute names to values that will be set on the mock
         object.  Only public attributes may be set.
+      bounded_to: optionally, when class_to_mock is not a class, it points
+        to a real class object, to which attribute is bound
 
     Returns:
       MockObject that can be used as the class_to_mock would be.
     """
     if attrs is None:
       attrs = {}
-    new_mock = MockObject(class_to_mock, attrs=attrs)
+    new_mock = MockObject(class_to_mock, attrs=attrs, class_to_bind=bounded_to)
     self._mock_objects.append(new_mock)
     return new_mock
 
@@ -305,18 +306,23 @@ class Mox(object):
         of the type of attribute.
     """
 
+    if inspect.isclass(obj):
+      class_to_bind = obj
+    else:
+      class_to_bind = None
+
     attr_to_replace = getattr(obj, attr_name)
     attr_type = type(attr_to_replace)
 
     if attr_type == MockAnything or attr_type == MockObject:
       raise TypeError('Cannot mock a MockAnything! Did you remember to '
                       'call UnsetStubs in your previous test?')
-    
+
     type_check = (
         attr_type in self._USE_MOCK_OBJECT or inspect.isclass(attr_to_replace)
         or isinstance(attr_to_replace, object))
     if type_check and not use_mock_anything:
-      stub = self.CreateMock(attr_to_replace)
+      stub = self.CreateMock(attr_to_replace, bounded_to=class_to_bind)
     else:
       stub = self.CreateMockAnything(description='Stub for %s' % attr_to_replace)
       stub.__name__ = attr_name
@@ -367,7 +373,7 @@ class Mox(object):
     if attr_type == MockAnything or attr_type == MockObject:
       raise TypeError('Cannot mock a MockAnything! Did you remember to '
                       'call UnsetStubs in your previous test?')
-    
+
     if not inspect.isclass(attr_to_replace):
       raise TypeError('Given attr is not a Class.  Use StubOutWithMock.')
 
@@ -379,6 +385,7 @@ class Mox(object):
     """Restore stubs to their original state."""
 
     self.stubs.UnsetAll()
+
 
 def Replay(*args):
   """Put mocks into Replay mode.
@@ -453,22 +460,24 @@ class MockAnything(object):
         return self.__class__.__dir__.__get__(self, self.__class__)
 
     return self._CreateMockMethod(method_name)
-  
+
   def __str__(self):
     return self._CreateMockMethod('__str__')()
-  
+
   def __call__(self, *args, **kwargs):
     return self._CreateMockMethod('__call__')(*args, **kwargs)
-  
+
   def __getitem__(self, i):
     return self._CreateMockMethod('__getitem__')(i)
-  
-  def _CreateMockMethod(self, method_name, method_to_mock=None):
+
+  def _CreateMockMethod(self, method_name, method_to_mock=None,
+                        class_to_bind=object):
     """Create a new mock method call and return it.
 
     Args:
       # method_name: the name of the method being called.
       # method_to_mock: The actual method being mocked, used for introspection.
+      # class_to_bind: Class to which method is bounded (object by default)
       method_name: str
       method_to_mock: a method object
 
@@ -478,13 +487,14 @@ class MockAnything(object):
 
     return MockMethod(method_name, self._expected_calls_queue,
                       self._replay_mode, method_to_mock=method_to_mock,
-                      description=self._description)
+                      description=self._description,
+                      class_to_bind=class_to_bind)
 
   def __nonzero__(self):
     """Return 1 for nonzero so the mock can be used as a conditional."""
 
     return 1
-  
+
   def __bool__(self):
     """Return True for nonzero so the mock can be used as a conditional."""
     return True
@@ -537,7 +547,7 @@ class MockAnything(object):
 class MockObject(MockAnything):
   """A mock object that simulates the public/protected interface of a class."""
 
-  def __init__(self, class_to_mock, attrs=None):
+  def __init__(self, class_to_mock, attrs=None, class_to_bind=None):
     """Initialize a mock object.
 
     This determines the methods and properties of the class and stores them.
@@ -547,6 +557,8 @@ class MockObject(MockAnything):
       class_to_mock: class
       attrs: dict of attribute names to values that will be set on the mock
         object.  Only public attributes may be set.
+      class_to_bind: optionally, when class_to_mock is not a class at all, it
+        points to a real class
 
     Raises:
       PrivateAttributeError: if a supplied attribute is not public.
@@ -563,6 +575,12 @@ class MockObject(MockAnything):
     self._known_methods = set()
     self._known_vars = set()
     self._class_to_mock = class_to_mock
+
+    if inspect.isclass(self._class_to_mock):
+      self._class_to_bind = self._class_to_mock
+    else:
+      self._class_to_bind = class_to_bind
+
     try:
       if inspect.isclass(self._class_to_mock):
         self._description = class_to_mock.__name__
@@ -590,6 +608,11 @@ class MockObject(MockAnything):
                                                                 class_to_mock))
       else:
         setattr(self, attr, value)
+
+  def _CreateMockMethod(self, *args, **kwargs):
+    """Overridden to provide self._class_to_mock to class_to_bind parameter."""
+    kwargs.setdefault("class_to_bind", self._class_to_bind)
+    return super(MockObject, self)._CreateMockMethod(*args, **kwargs)
 
   def __getattr__(self, name):
     """Intercept attribute request on this object.
@@ -776,7 +799,7 @@ class MockObject(MockAnything):
     # __call__ method
     method = None
     if type(self._class_to_mock) in (types.FunctionType, types.MethodType):
-      method = self._class_to_mock;
+      method = self._class_to_mock
     else:
       method = getattr(self._class_to_mock, '__call__')
     mock_method = self._CreateMockMethod('__call__', method_to_mock=method)
@@ -848,12 +871,15 @@ class MethodSignatureChecker(object):
 
   _NEEDED, _DEFAULT, _GIVEN = range(3)
 
-  def __init__(self, method):
+  def __init__(self, method, class_to_bind=None):
     """Creates a checker.
 
     Args:
       # method: A method to check.
+      # class_to_bind: optionally, a class used to type check first method
+      #     parameter, only used with unbound methods
       method: function
+      class_to_bind: type or None
 
     Raises:
       ValueError: method could not be inspected, so checks aren't possible.
@@ -864,10 +890,17 @@ class MethodSignatureChecker(object):
     except TypeError:
       raise ValueError('Could not get argument specification for %r'
                        % (method,))
-    if inspect.ismethod(method):
+    if inspect.ismethod(method) or class_to_bind:
       self._args = self._args[1:]  # Skip 'self'.
     self._method = method
     self._instance = None  # May contain the instance this is bound to.
+    self._instance = getattr(method, "__self__", None)
+
+    # _bounded_to determines whether the method is bound or not
+    if self._instance:
+      self._bounded_to = self._instance.__class__
+    else:
+      self._bounded_to = class_to_bind or getattr(method, "im_class", None)
 
     self._has_varargs = varargs is not None
     self._has_varkw = varkw is not None
@@ -920,10 +953,10 @@ class MethodSignatureChecker(object):
     #
     # NOTE: If a Func() comparator is used, and the signature is not
     # correct, this will cause extra executions of the function.
-    if inspect.ismethod(self._method):
+    if inspect.ismethod(self._method) or self._bounded_to:
       # The extra param accounts for the bound instance.
       if len(params) > len(self._required_args):
-        expected = getattr(self._method, 'im_class', None)
+        expected = self._bounded_to
 
         # Check if the param is an instance of the expected class,
         # or check equality (useful for checking Comparators).
@@ -934,7 +967,7 @@ class MethodSignatureChecker(object):
         try:
           param_equality = (params[0] == expected)
         except:
-          param_equality = False;
+          param_equality = False
 
 
         if isinstance(params[0], expected) or param_equality:
@@ -982,7 +1015,7 @@ class MockMethod(object):
   """
 
   def __init__(self, method_name, call_queue, replay_mode,
-               method_to_mock=None, description=None):
+               method_to_mock=None, description=None, class_to_bind=None):
     """Construct a new mock method.
 
     Args:
@@ -994,11 +1027,16 @@ class MockMethod(object):
       # method_to_mock: The actual method being mocked, used for introspection.
       # description: optionally, a descriptive name for this method. Typically
       #     this is equal to the descriptive name of the method's class.
+      # class_to_bind: optionally, a class that is used for unbound methods
+      #     (or functions in Python3) to which method is bound, in order not
+      #     to loose binding information. If given, it will be used for
+      #     checking the type of first method parameter
       method_name: str
       call_queue: list or deque
       replay_mode: bool
       method_to_mock: a method object
       description: str or None
+      class_to_bind: type or None
     """
 
     self._name = method_name
@@ -1016,7 +1054,8 @@ class MockMethod(object):
     self._side_effects = None
 
     try:
-      self._checker = MethodSignatureChecker(method_to_mock)
+      self._checker = MethodSignatureChecker(method_to_mock,
+                        class_to_bind=class_to_bind)
     except ValueError:
       self._checker = None
 
@@ -1069,7 +1108,7 @@ class MockMethod(object):
     """Raise a TypeError with a helpful message."""
     raise TypeError('MockMethod cannot be iterated. '
                     'Did you remember to put your mocks in replay mode?')
-    
+
   def __next__(self):
     """Raise a TypeError with a helpful message."""
     raise TypeError('MockMethod cannot be iterated. '
@@ -1117,7 +1156,7 @@ class MockMethod(object):
     if self._description:
       full_desc = "%s.%s" % (self._description, full_desc)
     return full_desc
-  
+
   def __hash__(self):
     return id(self)
 
@@ -1643,7 +1682,7 @@ class SameElementsAs(Comparator):
       # This happens because Mox uses __eq__ both to check object equality (in
       # MethodSignatureChecker) and to invoke Comparators.
       return False
-    
+
     try:
       return set(self._expected_list) == set(actual_list)
     except TypeError:
