@@ -3,6 +3,8 @@ python:
   - "2.6"
   - "2.7"
   - "3.2"
+install: pip install pep8
 script:
+  - pep8 --ignore E111 *.py || echo "Done"
   - python mox_test.py
   - python stubout_test.py
