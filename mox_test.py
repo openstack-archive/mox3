@@ -23,6 +23,7 @@
 import io
 import unittest
 import re
+import sys
 
 import mox
 
@@ -747,6 +748,21 @@ class MockAnythingTest(unittest.TestCase):
 
 class MethodCheckerTest(unittest.TestCase):
   """Tests MockMethod's use of MethodChecker method."""
+
+  def testUnboundMethodsRequiresInstance(self):
+    # SKIP TEST IN PYTHON 2.x (Ugly hack for python 2.6)
+    # REASON: semantics for unbound methods has changed only in Python 3
+    #   so this test in earlier versions is invald
+    if sys.version_info < (3, 0):
+      return
+
+    instance = CheckCallTestClass()
+    method = mox.MockMethod('NoParameters', [], False,
+                            CheckCallTestClass.NoParameters)
+
+    self.assertRaises(AttributeError, method)
+    method(instance)
+    self.assertRaises(AttributeError, method, instance, 1)
 
   def testNoParameters(self):
     method = mox.MockMethod('NoParameters', [], False,
