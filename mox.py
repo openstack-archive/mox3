@@ -576,7 +576,7 @@ class MockObject(MockAnything):
     self._known_vars = set()
     self._class_to_mock = class_to_mock
 
-    if inspect.isclass(self._class_to_mock):
+    if inspect.isclass(class_to_mock):
       self._class_to_bind = self._class_to_mock
     else:
       self._class_to_bind = class_to_bind
@@ -816,6 +816,10 @@ class MockObject(MockAnything):
   def __name__(self):
     """Return the name that is being mocked."""
     return self._description
+
+  def __dir__(self):
+    """Return only attributes of a class to mock """
+    return dir(self._class_to_mock)
 
 
 class _MockObjectFactory(MockObject):
