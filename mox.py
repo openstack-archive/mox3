@@ -807,19 +807,27 @@ class MockObject(MockAnything):
     return mock_method(*params, **named_params)
 
   @property
-  def __class__(self):
-    """Return the class that is being mocked."""
-
-    return self._class_to_mock
-
-  @property
   def __name__(self):
     """Return the name that is being mocked."""
     return self._description
 
+  # TODO(dejw): this property stopped to work after I introduced changes with
+  #   binding classes. Fortunately I found a solution in the form of
+  #   __getattribute__ method below, but this issue should be investigated
+  @property
+  def __class__(self):
+    return self._class_to_mock
+
   def __dir__(self):
     """Return only attributes of a class to mock """
     return dir(self._class_to_mock)
+
+  def __getattribute__(self, name):
+    """Return _class_to_mock on __class__ attribute. """
+    if name == "__class__":
+      return super(MockObject, self).__getattribute__("_class_to_mock")
+
+    return super(MockObject, self).__getattribute__(name)
 
 
 class _MockObjectFactory(MockObject):
