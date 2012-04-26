@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Unit tests for Mox.
 #
 # Copyright 2008 Google Inc.
@@ -16,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file was mofified by:
-#   quermit@gmail.com
-#   dawid.fatyga@gmail.com
+# 
+# This is a fork of the pymox library intended to work with Python 3.
+# The file was modified by quermit@gmail.com and dawid.fatyga@gmail.com
 
 import io
 import unittest
