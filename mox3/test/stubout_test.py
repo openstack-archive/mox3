@@ -18,29 +18,29 @@
 
 import unittest
 
-import mox
-import stubout
-import stubout_testee
+from mox3 import mox
+from mox3 import stubout
+from . import stubout_helper
 
 
 class StubOutForTestingTest(unittest.TestCase):
   def setUp(self):
     self.mox = mox.Mox()
-    self.sample_function_backup = stubout_testee.SampleFunction
+    self.sample_function_backup = stubout_helper.SampleFunction
 
   def tearDown(self):
-    stubout_testee.SampleFunction = self.sample_function_backup
+    stubout_helper.SampleFunction = self.sample_function_backup
 
   def testSmartSetOnModule(self):
     mock_function = self.mox.CreateMockAnything()
     mock_function()
 
     stubber = stubout.StubOutForTesting()
-    stubber.SmartSet(stubout_testee, 'SampleFunction', mock_function)
+    stubber.SmartSet(stubout_helper, 'SampleFunction', mock_function)
 
     self.mox.ReplayAll()
 
-    stubout_testee.SampleFunction()
+    stubout_helper.SampleFunction()
 
     self.mox.VerifyAll()
 

@@ -70,7 +70,7 @@ import re
 import types
 import unittest
 
-import stubout
+from . import stubout
 
 
 class Error(AssertionError):

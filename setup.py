@@ -18,14 +18,15 @@
 
 from distutils.core import setup
 
-setup(name='mox',
-      version='0.5.4',
-      py_modules=['mox', 'stubout'],
+setup(name='mox3',
+      version='0.6.0',
+      py_modules=['mox3.mox', 'mox3.stubout'],
       url='https://github.com/quermit/pymox',
       maintainer='quermit',
       maintainer_email='quermit@gmail.com',
       license='Apache License, Version 2.0',
-      description='Mock object framework',
-      long_description=('Mox is a mock object framework for Python based on '
-                        'the Java mock object framework EasyMock.'),
+      description='Mock object framework (forked from the mox framework)',
+      long_description=('Mox3 is a mock object framework for Python 3 based on '
+                        'the Google mox framework. The library should work '
+                        'well with Python 3.2, 2.7 and 2.6'),
       )

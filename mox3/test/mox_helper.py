@@ -29,7 +29,7 @@ See mox_test.MoxTestBaseTest for how this class is actually used.
 
 import os
 
-import mox
+from mox3 import mox
 
 
 class ExampleMoxTestMixin(object):
