@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2008 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file was mofified by quermit@gmail.com
+# 
+# This is a fork of the pymox library intended to work with Python 3.
+# The file was modified by quermit@gmail.com and dawid.fatyga@gmail.com
 
 from distutils.core import setup
 
 setup(name='mox',
-      version='0.5.3',
+      version='0.5.4',
       py_modules=['mox', 'stubout'],
       url='https://github.com/quermit/pymox',
       maintainer='quermit',
       maintainer_email='quermit@gmail.com',
       license='Apache License, Version 2.0',
       description='Mock object framework',
-      long_description=('Mox is a mock object framework for Python based on'
+      long_description=('Mox is a mock object framework for Python based on '
                         'the Java mock object framework EasyMock.'),
       )
