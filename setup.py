@@ -20,7 +20,7 @@ from distutils.core import setup
 
 setup(name='mox3',
       version='0.6.0',
-      packages=['mox3'],
+      packages=['mox3', 'mox3.tests'],
       url='https://github.com/quermit/pymox',
       author='quermit',
       author_email='quermit@gmail.com',
