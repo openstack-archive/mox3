@@ -20,8 +20,10 @@ from distutils.core import setup
 
 setup(name='mox3',
       version='0.6.0',
-      py_modules=['mox3.mox', 'mox3.stubout'],
+      packages=['mox3'],
       url='https://github.com/quermit/pymox',
+      author='quermit',
+      author_email='quermit@gmail.com',
       maintainer='quermit',
       maintainer_email='quermit@gmail.com',
       license='Apache License, Version 2.0',
@@ -29,4 +31,13 @@ setup(name='mox3',
       long_description=('Mox3 is a mock object framework for Python 3 based on '
                         'the Google mox framework. The library should work '
                         'well with Python 3.2, 2.7 and 2.6'),
+      classifiers=['Programming Language :: Python',
+                   'License :: OSI Approved :: Apache Software License',
+                   'Programming Language :: Python :: 2.6',
+                   'Programming Language :: Python :: 2.7',
+                   'Programming Language :: Python :: 3',
+                   'Operating System :: OS Independent',
+                   'Development Status :: 4 - Beta',
+                   'Intended Audience :: Developers',
+                   'Topic :: Software Development :: Testing'],
       )
