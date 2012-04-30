@@ -25,10 +25,10 @@ setup(name='mox3',
       maintainer='quermit',
       maintainer_email='quermit@gmail.com',
       license='Apache License, Version 2.0',
-      description='Mock object framework (forked from the mox framework)',
-      long_description=('Mox3 is a mock object framework for Python 3 based on '
-                        'the Google mox framework. The library should work '
-                        'well with Python 3.2, 2.7 and 2.6'),
+      description='Mock object framework for Python 3',
+      long_description=('Mox3 is an unofficial port of the of the mox '
+                        'framework to Python 3. The library was tested on '
+                        'Python version 3.2, 2.7 and 2.6.'),
       classifiers=['Programming Language :: Python',
                    'License :: OSI Approved :: Apache Software License',
                    'Programming Language :: Python :: 2.6',
