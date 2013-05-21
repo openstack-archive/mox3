@@ -19,7 +19,7 @@ import unittest
 
 from mox3 import mox
 from mox3 import stubout
-from . import stubout_helper
+from mox3.tests import stubout_helper
 
 
 class StubOutForTestingTest(unittest.TestCase):
