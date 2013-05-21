@@ -15,20 +15,21 @@
 # This is a fork of the pymox library intended to work with Python 3.
 # The file was modified by quermit@gmail.com and dawid.fatyga@gmail.com
 
-import unittest
+import fixtures
+import testtools
 
 from mox3 import mox
 from mox3 import stubout
 from mox3.tests import stubout_helper
 
 
-class StubOutForTestingTest(unittest.TestCase):
+class StubOutForTestingTest(testtools.TestCase):
     def setUp(self):
+        super(StubOutForTestingTest, self).setUp()
         self.mox = mox.Mox()
-        self.sample_function_backup = stubout_helper.SampleFunction
-
-    def tearDown(self):
-        stubout_helper.SampleFunction = self.sample_function_backup
+        self.useFixture(fixtures.MonkeyPatch(
+            'mox3.tests.stubout_helper.SampleFunction',
+            stubout_helper.SampleFunction))
 
     def testSmartSetOnModule(self):
         mock_function = self.mox.CreateMockAnything()
@@ -45,4 +46,4 @@ class StubOutForTestingTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    testtools.main()
