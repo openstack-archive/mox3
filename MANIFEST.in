@@ -1,2 +1,6 @@
-include COPYING.txt
-include README.txt
+include AUTHORS
+include ChangeLog
+exclude .gitignore
+exclude .gitreview
+
+global-exclude *.pyc

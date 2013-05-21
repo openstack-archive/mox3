@@ -16,15 +16,15 @@
 # This is a fork of the pymox library intended to work with Python 3.
 # The file was modified by quermit@gmail.com and dawid.fatyga@gmail.com
 
-"""A very basic test class derived from mox.MoxTestBase, used by mox_test.py.
+"""A very basic test class derived from mox.MoxTestBase, used by test_mox.py.
 
 The class defined in this module is used to test the features of
 MoxTestBase and is not intended to be a standalone test.  It needs to
 be in a separate module, because otherwise the tests in this class
 (which should not all pass) would be executed as part of the
-mox_test.py test suite.
+test_mox.py test suite.
 
-See mox_test.MoxTestBaseTest for how this class is actually used.
+See test_mox.MoxTestBaseTest for how this class is actually used.
 """
 
 import os

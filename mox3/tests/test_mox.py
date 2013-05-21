@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# 
 # This is a fork of the pymox library intended to work with Python 3.
 # The file was modified by quermit@gmail.com and dawid.fatyga@gmail.com
 
@@ -97,13 +96,13 @@ class AndTest(unittest.TestCase):
     """
     test_dict = {"mock": "obj", "testing": "isCOOL"}
     self.assertTrue(mox.And(mox.In("testing"),
-                           mox.ContainsKeyValue("mock", "obj")) == test_dict)
+                    mox.ContainsKeyValue("mock", "obj")) == test_dict)
 
   def testAdvancedUsageFails(self):
     """Note: this test is reliant on In and ContainsKeyValue."""
     test_dict = {"mock": "obj", "testing": "isCOOL"}
     self.assertFalse(mox.And(mox.In("NOTFOUND"),
-                          mox.ContainsKeyValue("mock", "obj")) == test_dict)
+                     mox.ContainsKeyValue("mock", "obj")) == test_dict)
 
 
 class FuncTest(unittest.TestCase):
@@ -2275,8 +2274,8 @@ class MoxTestBaseMultipleInheritanceTest(mox.MoxTestBase, MyTestCase):
 class MoxTestDontMockProperties(MoxTestBaseTest):
     def testPropertiesArentMocked(self):
         mock_class = self.mox.CreateMock(ClassWithProperties)
-        self.assertRaises(mox.UnknownMethodCallError, lambda:
-                mock_class.prop_attr)
+        self.assertRaises(mox.UnknownMethodCallError,
+                          lambda: mock_class.prop_attr)
 
 
 class TestClass(object):
