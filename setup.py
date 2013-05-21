@@ -21,9 +21,9 @@ from distutils.core import setup
 setup(name='mox3',
       version='0.6.0',
       packages=['mox3', 'mox3.tests'],
-      url='https://github.com/quermit/pymox',
-      maintainer='quermit',
-      maintainer_email='quermit@gmail.com',
+      url='https://github.com/openstack-dev/mox3',
+      maintainer='OpenStack Developers',
+      maintainer_email='openstack-dev@lists.openstack.org',
       license='Apache License, Version 2.0',
       description='Mock object framework for Python 3',
       long_description=('Mox3 is an unofficial port of the of the mox '
