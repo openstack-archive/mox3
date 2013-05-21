@@ -33,113 +33,113 @@ from mox3 import mox
 
 
 class ExampleMoxTestMixin(object):
-  """Mix-in class for mox test case class.
+    """Mix-in class for mox test case class.
 
-  It stubs out the same function as one of the test methods in
-  the example test case.  Both tests must pass as meta class wraps
-  test methods in all base classes.
-  """
+    It stubs out the same function as one of the test methods in
+    the example test case.    Both tests must pass as meta class wraps
+    test methods in all base classes.
+    """
 
-  def testStat(self):
-    self.mox.StubOutWithMock(os, 'stat')
-    os.stat(self.DIR_PATH)
-    self.mox.ReplayAll()
-    os.stat(self.DIR_PATH)
+    def testStat(self):
+        self.mox.StubOutWithMock(os, 'stat')
+        os.stat(self.DIR_PATH)
+        self.mox.ReplayAll()
+        os.stat(self.DIR_PATH)
 
 
 class ExampleMoxTest(mox.MoxTestBase, ExampleMoxTestMixin):
 
-  DIR_PATH = '/path/to/some/directory'
+    DIR_PATH = '/path/to/some/directory'
 
-  def testSuccess(self):
-    self.mox.StubOutWithMock(os, 'listdir')
-    os.listdir(self.DIR_PATH)
-    self.mox.ReplayAll()
-    os.listdir(self.DIR_PATH)
+    def testSuccess(self):
+        self.mox.StubOutWithMock(os, 'listdir')
+        os.listdir(self.DIR_PATH)
+        self.mox.ReplayAll()
+        os.listdir(self.DIR_PATH)
 
-  def testExpectedNotCalled(self):
-    self.mox.StubOutWithMock(os, 'listdir')
-    os.listdir(self.DIR_PATH)
-    self.mox.ReplayAll()
+    def testExpectedNotCalled(self):
+        self.mox.StubOutWithMock(os, 'listdir')
+        os.listdir(self.DIR_PATH)
+        self.mox.ReplayAll()
 
-  def testUnexpectedCall(self):
-    self.mox.StubOutWithMock(os, 'listdir')
-    os.listdir(self.DIR_PATH)
-    self.mox.ReplayAll()
-    os.listdir('/path/to/some/other/directory')
-    os.listdir(self.DIR_PATH)
+    def testUnexpectedCall(self):
+        self.mox.StubOutWithMock(os, 'listdir')
+        os.listdir(self.DIR_PATH)
+        self.mox.ReplayAll()
+        os.listdir('/path/to/some/other/directory')
+        os.listdir(self.DIR_PATH)
 
-  def testFailure(self):
-    self.assertTrue(False)
+    def testFailure(self):
+        self.assertTrue(False)
 
-  def testStatOther(self):
-    self.mox.StubOutWithMock(os, 'stat')
-    os.stat(self.DIR_PATH)
-    self.mox.ReplayAll()
-    os.stat(self.DIR_PATH)
+    def testStatOther(self):
+        self.mox.StubOutWithMock(os, 'stat')
+        os.stat(self.DIR_PATH)
+        self.mox.ReplayAll()
+        os.stat(self.DIR_PATH)
 
-  def testHasStubs(self):
-    listdir_list = []
+    def testHasStubs(self):
+        listdir_list = []
 
-    def MockListdir(directory):
-      listdir_list.append(directory)
+        def MockListdir(directory):
+            listdir_list.append(directory)
 
-    self.stubs.Set(os, 'listdir', MockListdir)
-    os.listdir(self.DIR_PATH)
-    self.assertEqual([self.DIR_PATH], listdir_list)
+        self.stubs.Set(os, 'listdir', MockListdir)
+        os.listdir(self.DIR_PATH)
+        self.assertEqual([self.DIR_PATH], listdir_list)
 
 
 class TestClassFromAnotherModule(object):
 
-  def __init__(self):
-    return None
+    def __init__(self):
+        return None
 
-  def Value(self):
-    return 'Not mock'
+    def Value(self):
+        return 'Not mock'
 
 
 class ChildClassFromAnotherModule(TestClassFromAnotherModule):
-  """A child class of TestClassFromAnotherModule.
+    """A child class of TestClassFromAnotherModule.
 
-  Used to test stubbing out unbound methods, where child classes
-  are eventually bound.
-  """
+    Used to test stubbing out unbound methods, where child classes
+    are eventually bound.
+    """
 
-  def __init__(self):
-    TestClassFromAnotherModule.__init__(self)
+    def __init__(self):
+        TestClassFromAnotherModule.__init__(self)
 
 
 class CallableClass(object):
 
-  def __init__(self, one, two, nine=None):
-    pass
+    def __init__(self, one, two, nine=None):
+        pass
 
-  def __call__(self, one):
-    return 'Not mock'
+    def __call__(self, one):
+        return 'Not mock'
 
-  def Value(self):
-    return 'Not mock'
+    def Value(self):
+        return 'Not mock'
 
 
 def MyTestFunction(one, two, nine=None):
-  pass
+    pass
 
 
 class ExampleClass(object):
-  def __init__(self, foo='bar'):
-    pass
+    def __init__(self, foo='bar'):
+        pass
 
-  def TestMethod(self, one, two, nine=None):
-    pass
+    def TestMethod(self, one, two, nine=None):
+        pass
 
-  def NamedParams(self, ignore, foo='bar', baz='qux'):
-    pass
+    def NamedParams(self, ignore, foo='bar', baz='qux'):
+        pass
 
-  def SpecialArgs(self, *args, **kwargs):
-    pass
+    def SpecialArgs(self, *args, **kwargs):
+        pass
 
 
 # This class is used to test stubbing out __init__ of a parent class.
 class ChildExampleClass(ExampleClass):
-  def __init__(self):
-    ExampleClass.__init__(self)
+    def __init__(self):
+        ExampleClass.__init__(self)
