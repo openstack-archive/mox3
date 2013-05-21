@@ -65,3 +65,7 @@ publish
 
 # PyDev
 .pydevproject
+
+# pbr
+AUTHORS
+ChangeLog
