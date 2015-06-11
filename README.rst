@@ -50,3 +50,11 @@ Original Copyright
 Mox is Copyright 2008 Google Inc, and licensed under the Apache
 License, Version 2.0; see the file COPYING.txt for details.  If you would
 like to help us improve Mox, join the group.
+
+OpenStack Fork
+--------------
+
+* Free software: Apache license
+* Documentation: http://docs.openstack.org/developer/mox3
+* Source: http://git.openstack.org/cgit/openstack/mox3
+* Bugs: http://bugs.launchpad.net/python-mox3
