@@ -19,12 +19,10 @@
 
 import io
 import re
-import sys
 
 from mox3 import mox
 from mox3.tests import mox_helper
 
-import six
 import testtools
 
 
@@ -771,21 +769,6 @@ class MockAnythingTest(testtools.TestCase):
 
 class MethodCheckerTest(testtools.TestCase):
     """Tests MockMethod's use of MethodChecker method."""
-
-    def testUnboundMethodsRequiresInstance(self):
-        # SKIP TEST IN PYTHON 2.x (Ugly hack for python 2.6)
-        # REASON: semantics for unbound methods has changed only in Python 3
-        #     so this test in earlier versions is invald
-        if sys.version_info < (3, 0):
-            return
-
-        instance = CheckCallTestClass()
-        method = mox.MockMethod('NoParameters', [], False,
-                                CheckCallTestClass.NoParameters)
-
-        self.assertRaises(AttributeError, method)
-        method(instance)
-        self.assertRaises(AttributeError, method, instance, 1)
 
     def testNoParameters(self):
         method = mox.MockMethod('NoParameters', [], False,
@@ -1908,7 +1891,6 @@ class MoxTest(testtools.TestCase):
     # FIXME(dhellmann): Skip this test until someone can debug why it
     # fails on python 3.4.
 
-    @testtools.skipIf(six.PY3, "This test needs to be fixed for python 3")
     def testStubOutClass_OldStyle(self):
         """Test a mocked class whose __init__ returns a Mock."""
         self.mox.StubOutWithMock(mox_helper, 'TestClassFromAnotherModule')

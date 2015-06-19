@@ -910,7 +910,9 @@ class MethodSignatureChecker(object):
         except TypeError:
             raise ValueError('Could not get argument specification for %r'
                              % (method,))
-        if inspect.ismethod(method) or class_to_bind:
+        if (inspect.ismethod(method) or class_to_bind or (
+                hasattr(self, '_args') and len(self._args) > 0
+                and self._args[0] == 'self')):
             self._args = self._args[1:]    # Skip 'self'.
         self._method = method
         self._instance = None    # May contain the instance this is bound to.
