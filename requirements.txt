@@ -3,4 +3,4 @@
 # process, which may cause wedges in the gate later.
 pbr<2.0,>=0.11
 
-fixtures>=0.3.14
+fixtures>=1.3.1
