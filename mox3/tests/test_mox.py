@@ -283,7 +283,7 @@ class StrContainsTest(testtools.TestCase):
         self.assertFalse(mox.StrContains("AAA") == "hello world")
 
     def testMultipleMatches(self):
-        """Should return True if there are multiple occurances of substring."""
+        """Should return True if there are multiple occurrences of substring"""
         self.assertTrue(mox.StrContains("abc") == "ababcabcabcababc")
 
 
