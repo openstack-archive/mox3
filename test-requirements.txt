@@ -9,7 +9,6 @@ pyflakes==0.8.1 # MIT
 flake8<2.6.0,>=2.5.4 # MIT
 
 coverage>=3.6 # Apache-2.0
-discover # BSD
 python-subunit>=0.0.18 # Apache-2.0/BSD
 testrepository>=0.0.18 # Apache-2.0/BSD
 testtools>=1.4.0 # MIT
