@@ -764,7 +764,7 @@ class MockAnythingTest(testtools.TestCase):
 
     def testIsReprable(self):
         """Test that MockAnythings can be repr'd without causing a failure."""
-        self.assertTrue('MockAnything' in repr(self.mock_object))
+        self.assertIn('MockAnything', repr(self.mock_object))
 
 
 class MethodCheckerTest(testtools.TestCase):
@@ -961,27 +961,27 @@ class MockObjectTest(testtools.TestCase):
 
     def testFindValidMethods(self):
         """Mock should be able to mock all public methods."""
-        self.assertTrue('ValidCall' in self.mock_object._known_methods)
-        self.assertTrue('OtherValidCall' in self.mock_object._known_methods)
-        self.assertTrue('MyClassMethod' in self.mock_object._known_methods)
-        self.assertTrue('MyStaticMethod' in self.mock_object._known_methods)
-        self.assertTrue('_ProtectedCall' in self.mock_object._known_methods)
-        self.assertTrue('__PrivateCall' not in self.mock_object._known_methods)
-        self.assertTrue(
-            '_TestClass__PrivateCall' in self.mock_object._known_methods)
+        self.assertIn('ValidCall', self.mock_object._known_methods)
+        self.assertIn('OtherValidCall', self.mock_object._known_methods)
+        self.assertIn('MyClassMethod', self.mock_object._known_methods)
+        self.assertIn('MyStaticMethod', self.mock_object._known_methods)
+        self.assertIn('_ProtectedCall', self.mock_object._known_methods)
+        self.assertNotIn('__PrivateCall', self.mock_object._known_methods)
+        self.assertIn(
+            '_TestClass__PrivateCall', self.mock_object._known_methods)
 
     def testFindsSuperclassMethods(self):
         """Mock should be able to mock superclasses methods."""
         self.mock_object = mox.MockObject(ChildClass)
-        self.assertTrue('ValidCall' in self.mock_object._known_methods)
-        self.assertTrue('OtherValidCall' in self.mock_object._known_methods)
-        self.assertTrue('MyClassMethod' in self.mock_object._known_methods)
-        self.assertTrue('ChildValidCall' in self.mock_object._known_methods)
+        self.assertIn('ValidCall', self.mock_object._known_methods)
+        self.assertIn('OtherValidCall', self.mock_object._known_methods)
+        self.assertIn('MyClassMethod', self.mock_object._known_methods)
+        self.assertIn('ChildValidCall', self.mock_object._known_methods)
 
     def testAccessClassVariables(self):
         """Class variables should be accessible through the mock."""
-        self.assertTrue('SOME_CLASS_VAR' in self.mock_object._known_vars)
-        self.assertTrue('_PROTECTED_CLASS_VAR' in self.mock_object._known_vars)
+        self.assertIn('SOME_CLASS_VAR', self.mock_object._known_vars)
+        self.assertIn('_PROTECTED_CLASS_VAR', self.mock_object._known_vars)
         self.assertEqual('test_value', self.mock_object.SOME_CLASS_VAR)
 
     def testEquals(self):
@@ -1183,7 +1183,7 @@ class MockObjectTest(testtools.TestCase):
 
         dummy._Replay()
 
-        self.assertTrue('X' in dummy)
+        self.assertIn('X', dummy)
 
         dummy._Verify()
 
