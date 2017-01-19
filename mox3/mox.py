@@ -905,7 +905,15 @@ class MethodSignatureChecker(object):
                         possible. Some methods and functions like built-ins
                         can't be inspected.
         """
-
+        try:
+            self._args, varargs, varkw, defaults = inspect.getargspec(method)
+        except TypeError:
+            raise ValueError('Could not get argument specification for %r'
+                             % (method,))
+        if (inspect.ismethod(method) or class_to_bind or (
+                hasattr(self, '_args') and len(self._args) > 0
+                and self._args[0] == 'self')):
+            self._args = self._args[1:]    # Skip 'self'.
         self._method = method
         self._instance = None    # May contain the instance this is bound to.
         self._instance = getattr(method, "__self__", None)
@@ -917,65 +925,14 @@ class MethodSignatureChecker(object):
             self._bounded_to = class_to_bind or getattr(method, "im_class",
                                                         None)
 
-        # inspect.getargspec() is deprecated since Python 3.0, prefer
-        # inspect.signature() (available since Python 3.3) which supports
-        # also Python 3 keyword-only arguments.
-        if hasattr(inspect, 'signature'):
-            try:
-                signature = inspect.signature(method)
-                params = list(signature.parameters.values())
-            except TypeError:
-                raise ValueError('Could not get signature for %r'
-                                 % (method,))
-
-            Parameter = inspect.Parameter
-            self._has_varargs = any(param.kind == Parameter.VAR_POSITIONAL
-                                    for param in params)
-            self._has_varkw = any(param.kind == Parameter.VAR_KEYWORD
-                                  for param in params)
-
-            if (inspect.ismethod(method) or class_to_bind
-               or (params and params[0].name == 'self')):
-                params = params[1:]
-
-            # Truncate params at the first *args or **kwargs parameter
-            for index, param in enumerate(params):
-                if param.kind in (Parameter.VAR_POSITIONAL,
-                                  Parameter.VAR_KEYWORD):
-                    del params[index:]
-                    break
-
-            required = 0
-            for param in params:
-                if param.default is not Parameter.empty:
-                    break
-                required += 1
-
-            self._args = [param.name for param in params]
-            self._required_args = self._args[:required]
-            self._default_args = self._args[required:]
+        self._has_varargs = varargs is not None
+        self._has_varkw = varkw is not None
+        if defaults is None:
+            self._required_args = self._args
+            self._default_args = []
         else:
-            try:
-                argspec = inspect.getargspec(method)
-            except TypeError:
-                raise ValueError('Could not get argument specification for %r'
-                                 % (method,))
-
-            args = argspec.args
-            if (inspect.ismethod(method) or class_to_bind or (
-                    args and args[0] == 'self')):
-                args = args[1:]    # Skip 'self'.
-
-            self._has_varargs = (argspec.varargs is not None)
-            self._has_varkw = (argspec.keywords is not None)
-            self._args = args
-            if argspec.defaults:
-                pos = -len(argspec.defaults)
-                self._required_args = args[:pos]
-                self._default_args = args[pos:]
-            else:
-                self._required_args = args
-                self._default_args = []
+            self._required_args = self._args[:-len(defaults)]
+            self._default_args = self._args[-len(defaults):]
 
     def _RecordArgumentGiven(self, arg_name, arg_status):
         """Mark an argument as being given.
