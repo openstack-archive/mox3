@@ -312,12 +312,12 @@ class RegexTest(testtools.TestCase):
     def testReprWithoutFlags(self):
         """repr should return the regular expression pattern."""
         self.assertTrue(
-            repr(mox.Regex(r"a\s+b")) == "<regular expression 'a\s+b'>")
+            repr(mox.Regex(r"a\s+b")) == r"<regular expression 'a\s+b'>")
 
     def testReprWithFlags(self):
         """repr should return the regular expression pattern and flags."""
-        self.assertTrue(repr(mox.Regex(r"a\s+b", flags=4)) ==
-                        "<regular expression 'a\s+b', flags=4>")
+        self.assertTrue(repr(mox.Regex(r"a\s+b", flags=8)) ==
+                        r"<regular expression 'a\s+b', flags=8>")
 
 
 class IsTest(testtools.TestCase):
