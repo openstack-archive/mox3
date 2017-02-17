@@ -1,3 +1,12 @@
+========================
+Team and repository tags
+========================
+
+.. image:: http://governance.openstack.org/badges/mox3.svg
+    :target: http://governance.openstack.org/reference/tags/index.html
+
+.. Change things from this point on
+
 Mox3 - Mock object framework for Python 3
 =========================================
 
