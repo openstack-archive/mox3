@@ -9,8 +9,8 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   readme
-   contributing
+   user/index
+   contributor/index
 
 Indices and tables
 ==================
