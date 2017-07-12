@@ -59,6 +59,6 @@ OpenStack Fork
 --------------
 
 * Free software: Apache license
-* Documentation: http://docs.openstack.org/developer/mox3
-* Source: http://git.openstack.org/cgit/openstack/mox3
-* Bugs: http://bugs.launchpad.net/python-mox3
+* Documentation: https://docs.openstack.org/mox3/latest/
+* Source: https://git.openstack.org/cgit/openstack/mox3
+* Bugs: https://bugs.launchpad.net/python-mox3
