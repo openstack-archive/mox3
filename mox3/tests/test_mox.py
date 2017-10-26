@@ -110,8 +110,12 @@ class FuncTest(testtools.TestCase):
 
     def testFuncTrueFalseEvaluation(self):
         """Should return True if the validating function returns True."""
-        equals_one = lambda x: x == 1
-        always_none = lambda x: None
+
+        def equals_one(x):
+            return x == 1
+
+        def always_none(x):
+            return None
 
         self.assertTrue(mox.Func(equals_one) == 1)
         self.assertFalse(mox.Func(equals_one) == 0)
@@ -210,8 +214,8 @@ class ContainsAttributeValueTest(testtools.TestCase):
 
     def testValidPair(self):
         """Return True if the object has the key attribute that matches."""
-        self.assertTrue(mox.ContainsAttributeValue("key", 1)
-                        == self.test_object)
+        self.assertTrue(mox.ContainsAttributeValue("key", 1) ==
+                        self.test_object)
 
     def testInvalidValue(self):
         """Should return False if the value is not correct."""
@@ -1257,8 +1261,8 @@ class MockObjectTest(testtools.TestCase):
         # NOT doing dummy[index]
 
         dummy._Replay()
-        function = lambda: [x for x in dummy]
-        self.assertRaises(mox.UnexpectedMethodCallError, function)
+        self.assertRaises(mox.UnexpectedMethodCallError,
+                          lambda: [x for x in dummy])
 
     def testMockGetIter_WithSubClassOfNewStyleClass(self):
         class NewStyleTestClass(object):
