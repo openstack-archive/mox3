@@ -3,9 +3,7 @@
 # process, which may cause wedges in the gate later.
 # this file lists dependencies required for the testing of heat
 
-# Install bounded pep8/pyflakes first, then let flake8 install
-pep8==1.5.7 # MIT
-pyflakes==0.8.1 # MIT
+# Install flake8 first, it pulls in the right linter versions
 flake8<2.6.0,>=2.5.4 # MIT
 
 coverage!=4.4,>=4.0 # Apache-2.0
