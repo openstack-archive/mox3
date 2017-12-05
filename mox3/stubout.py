@@ -90,8 +90,8 @@ class StubOutForTesting(object):
         # Calling getattr() on a staticmethod transforms it to a 'normal'
         # function. We need to ensure that we put it back as a staticmethod.
         old_attribute = obj.__dict__.get(attr_name)
-        if (old_attribute is not None
-                and isinstance(old_attribute, staticmethod)):
+        if (old_attribute is not None and
+                isinstance(old_attribute, staticmethod)):
             orig_attr = staticmethod(orig_attr)
 
         self.stubs.append((orig_obj, attr_name, orig_attr))
