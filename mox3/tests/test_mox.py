@@ -2255,7 +2255,7 @@ class MyTestCase(testtools.TestCase):
         self.another_critical_variable = 42
 
     def testMethodOverride(self):
-        """Should be properly overriden in a derived class."""
+        """Should be properly overridden in a derived class."""
         self.assertEqual(42, self.another_critical_variable)
         self.another_critical_variable += 1
 
