@@ -10,7 +10,7 @@ Mox3 is an unofficial port of the Google mox framework
 with mox as possible, but small enhancements have been made. The library was
 tested on Python version 3.2, 2.7 and 2.6.
 
-Use at your own risk ;) 
+Use at your own risk ;)
 
 To install:
 
@@ -37,7 +37,7 @@ http://wiki.openstack.org/testr
 
 Basic Usage
 -----------
-  
+
 The basic usage of mox3 is the same as with mox, but the initial import should
 be made from the mox3 module:
 
