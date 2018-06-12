@@ -2,8 +2,8 @@
  Mox3 - Mock object framework for Python 3
 ===========================================
 
-.. image:: http://governance.openstack.org/badges/mox3.svg
-    :target: http://governance.openstack.org/reference/tags/index.html
+.. image:: https://governance.openstack.org/tc/badges/mox3.svg
+    :target: https://governance.openstack.org/tc/reference/tags/index.html
 
 Mox3 is an unofficial port of the Google mox framework
 (http://code.google.com/p/pymox/) to Python 3. It was meant to be as compatible
