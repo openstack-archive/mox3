@@ -18,7 +18,7 @@ pip-log.txt
 # Unit test / coverage reports
 .coverage
 .tox
-.testrepository
+.stestr/
 
 #Translations
 *.mo
