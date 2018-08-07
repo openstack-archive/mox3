@@ -320,8 +320,8 @@ class RegexTest(testtools.TestCase):
 
     def testReprWithFlags(self):
         """repr should return the regular expression pattern and flags."""
-        self.assertTrue(repr(mox.Regex(r"a\s+b", flags=4)) ==
-                        "<regular expression 'a\s+b', flags=4>")
+        self.assertTrue(repr(mox.Regex(r"a\s+b", flags=2)) ==
+                        "<regular expression 'a\s+b', flags=2>")
 
 
 class IsTest(testtools.TestCase):
