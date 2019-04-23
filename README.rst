@@ -1,6 +1,6 @@
-===========================================
- Mox3 - Mock object framework for Python 3
-===========================================
+=========================================
+Mox3 - Mock object framework for Python 3
+=========================================
 
 .. image:: https://governance.openstack.org/tc/badges/mox3.svg
     :target: https://governance.openstack.org/tc/reference/tags/index.html
@@ -60,5 +60,5 @@ OpenStack Fork
 
 * Free software: Apache license
 * Documentation: https://docs.openstack.org/mox3/latest/
-* Source: https://git.openstack.org/cgit/openstack/mox3
+* Source: https://opendev.org/openstack/mox3
 * Bugs: https://bugs.launchpad.net/python-mox3
