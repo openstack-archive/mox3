@@ -33,7 +33,7 @@ installed locally already. In this case, you can interact with the testr
 command directly. Running `testr run` will run the entire test suite. `testr
 run --parallel` will run it in parallel (this is the default incantation tox
 uses.) More information about testr can be found at:
-http://wiki.openstack.org/testr
+https://wiki.openstack.org/wiki/Testr
 
 Basic Usage
 -----------
