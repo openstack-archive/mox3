@@ -11,7 +11,7 @@ Jinja2==2.10
 linecache2==1.0.0
 MarkupSafe==1.0
 mccabe==0.4.0
-openstackdocstheme==1.18.1
+openstackdocstheme==2.2.1
 pbr==2.0.0
 pep8==1.7.1
 pyflakes==1.0.0
@@ -22,7 +22,7 @@ pytz==2013.6
 requests==2.14.2
 six==1.10.0
 snowballstemmer==1.2.1
-Sphinx==1.6.5
+Sphinx==2.2.0
 sphinxcontrib-websupport==1.0.1
 stestr==2.0.0
 testtools==2.2.0
